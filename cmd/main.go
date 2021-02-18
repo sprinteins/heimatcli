@@ -7,7 +7,6 @@ import (
 )
 
 func completer(in prompt.Document) []prompt.Suggest {
-	// fmt.Printf("completer in: %s\n", in.Text)
 	s := sm.currentState.Suggestions(in)
 	return prompt.FilterHasPrefix(s, in.GetWordBeforeCursor(), true)
 }
@@ -18,14 +17,19 @@ var LivePrefixState struct {
 }
 
 func executor(in string) {
-	sm.currentState.Exe(in)
-	LivePrefixState.LivePrefix = sm.CurrentState().Prefix() + "> "
-	LivePrefixState.IsEnable = true
+
+	newStateKey := sm.currentState.Exe(in)
+	if newStateKey == stateKeyNoChange {
+		return
+	}
+
+	sm.ChangeState(newStateKey)
 
 }
 
 func changeLivePrefix() (string, bool) {
-	return LivePrefixState.LivePrefix, LivePrefixState.IsEnable
+	prefix := sm.CurrentState().Prefix()
+	return prefix, true
 }
 
 var sm *StateMachine
@@ -34,10 +38,16 @@ func main() {
 
 	heimatAPI := api.NewAPI("https://heimat.sprinteins.com/api/v1")
 
-	sm = NewStateMachine()
-	sm.AddState("login", NewStateLogin(heimatAPI))
+	sm = NewStateMachine(stateKeyHome)
+	sm.AddState(stateKeyLogin, NewStateLogin(heimatAPI))
+	sm.AddState(stateKeyHome, NewStateHome(heimatAPI))
+	sm.AddState(stateKeyTimeAdd, NewStateTimeAdd(heimatAPI, sm.Cancel))
 
-	sm.ChangeState("login")
+	if heimatAPI.IsAuthenticated() {
+		sm.ChangeState(stateKeyHome)
+	} else {
+		sm.ChangeState(stateKeyLogin)
+	}
 
 	p := prompt.New(
 		executor,
@@ -45,6 +55,13 @@ func main() {
 		prompt.OptionPrefix(">>> "),
 		prompt.OptionLivePrefix(changeLivePrefix),
 		prompt.OptionTitle("live-prefix-example"),
+		prompt.OptionSwitchKeyBindMode(prompt.CommonKeyBind),
+		prompt.OptionAddKeyBind(prompt.KeyBind{
+			Key: prompt.Escape,
+			Fn: func(b *prompt.Buffer) {
+				sm.Cancel()
+			},
+		}),
 	)
 	p.Run()
 }

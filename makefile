@@ -1,5 +1,5 @@
-run:
-	@go run ./cmd/*.go
+run: build
+	@./heimatcli
 
 build: 
-	@go build ./cmd/*.go
+	@go build -o ./heimatcli ./cmd/*.go
