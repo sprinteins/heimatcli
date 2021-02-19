@@ -11,10 +11,7 @@ import (
 // FetchDayByDate _
 // https://heimat-demo.sprinteins.com/api/v1/employees/42/trackedtimes?start=2020-01-01&end=2020-01-31
 func (api *API) FetchDayByDate(date time.Time) *heimat.Day {
-	// userID := api.UserID()
-	// apiURL := fmt.Sprintf("/employees/%d/trackedtimes?start=%s&end=%s", userID, date, date)
 
-	// url := api.baseURL + apiURL
 	url := api.urlDayByDate(api.UserID())
 
 	queries := []Query{

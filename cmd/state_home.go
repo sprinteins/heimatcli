@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"heimatcli/heimat"
 	"heimatcli/heimat/api"
+	"heimatcli/x/log"
 	"regexp"
 	"strings"
 	"time"
@@ -48,8 +49,13 @@ func (sh StateHome) Suggestions(in prompt.Document) []prompt.Suggest {
 		}
 	}
 
+	if strings.Contains(cmd, "profile") {
+		return []prompt.Suggest{}
+	}
+
 	return []prompt.Suggest{
 		{Text: "time", Description: "Time Tracking"},
+		{Text: "profile", Description: "Show the profile and stats about the user"},
 	}
 }
 
@@ -64,9 +70,18 @@ func (sh StateHome) Exe(in string) StateKey {
 	cmd := normalizeCommand(in)
 
 	if strings.Contains(cmd, "time show day") {
-		day := sh.api.FetchDayByDate(time.Now())
 
+		day := sh.api.FetchDayByDate(time.Now())
+		if day == nil {
+			return stateKeyNoChange
+		}
 		printDay(day)
+
+	}
+
+	if strings.Contains(cmd, "profile") {
+		u := sh.api.FetchUserByID(sh.api.UserID())
+		printUser(u)
 	}
 
 	if strings.Contains(cmd, "time add") {
@@ -86,6 +101,9 @@ func normalizeCommand(cmd string) string {
 }
 
 func printDay(day *heimat.Day) {
+
+	printHeimatDate(day.Date)
+
 	table := simpletable.New()
 
 	table.Header = &simpletable.Header{
@@ -131,4 +149,18 @@ func printDay(day *heimat.Day) {
 
 	table.SetStyle(simpletable.StyleCompactLite)
 	fmt.Println(table.String())
+}
+
+func printHeimatDate(d string) {
+	date, err := time.Parse("2006-01-02", d)
+	if err != nil {
+		log.Error.Printf("could not parse heimat date: %s", err)
+	}
+	dateString := date.Format("2006-01-02 (Mon)")
+
+	fmt.Printf("\n%s\n\n", dateString)
+}
+
+func printUser(u *heimat.User) {
+	fmt.Printf("%#v\n", u)
 }

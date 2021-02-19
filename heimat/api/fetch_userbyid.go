@@ -8,12 +8,13 @@ import (
 
 // FetchUserByID _
 // https://heimat-demo.sprinteins.com/api/v1/employees/42
-func (api *API) FetchUserByID(userID int) (*heimat.User, error) {
+func (api *API) FetchUserByID(userID int) *heimat.User {
 	apiURL := api.urlEmployeeByID(userID)
 
 	resp, _, err := httpGet(api.Token(), apiURL, nil)
 	if err != nil {
-		return nil, err
+		log.Error.Printf("could not fetch user: %s", err)
+		return nil
 	}
 
 	respBytes := readBody(resp)
@@ -26,8 +27,8 @@ func (api *API) FetchUserByID(userID int) (*heimat.User, error) {
 			string(respBytes),
 		)
 
-		return nil, err
+		return nil
 	}
 
-	return user, nil
+	return user
 }

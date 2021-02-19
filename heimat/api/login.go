@@ -70,11 +70,7 @@ func (api *API) IsAuthenticated() bool {
 func (api *API) isTokenValid() bool {
 
 	userID := api.UserID()
-	_, err := api.FetchUserByID(userID)
+	user := api.FetchUserByID(userID)
 
-	if err != nil {
-		return false
-	}
-
-	return true
+	return user != nil
 }

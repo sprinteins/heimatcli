@@ -7,6 +7,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/http/cookiejar"
+	"sync"
+	"time"
+
+	"github.com/briandowns/spinner"
 )
 
 func httpPost(
@@ -72,7 +76,20 @@ func httpRequest(
 	req.URL.RawQuery = q.Encode()
 
 	// Make Request
-	resp, err := client.Do(req)
+	s := spinner.New(spinner.CharSets[33], 100*time.Millisecond)
+	s.Start()
+
+	var resp *http.Response
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		resp, err = client.Do(req)
+		wg.Done()
+	}()
+	wg.Wait()
+	s.Stop()
+
 	if err != nil {
 		return nil, emptyCookieJar, err
 	}
