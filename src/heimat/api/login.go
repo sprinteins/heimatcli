@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"heimatcli/x/log"
-	"heimatcli/x/types"
+	"heimatcli/src/x/log"
+	"heimatcli/src/x/types"
 	"io/ioutil"
 )
 
@@ -30,7 +30,7 @@ func (api API) Login(username, password string) types.Token {
 	}
 
 	postURL := api.urlAuthentication()
-	resp, _, err := httpPost("", postURL, nil, p)
+	resp, _, err := api.httpPost("", postURL, nil, p)
 	if err != nil {
 		log.Error.Printf("could not make login request: %s", err)
 	}

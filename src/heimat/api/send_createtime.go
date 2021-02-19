@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"heimatcli/heimat"
-	"heimatcli/x/log"
+	"heimatcli/src/heimat"
+	"heimatcli/src/x/log"
 	"time"
 )
 
@@ -40,7 +40,7 @@ func (api *API) SendCreateTime(
 		return
 	}
 
-	resp, _, err := httpPost(api.Token(), apiURL, nil, payload)
+	resp, _, err := api.httpPost(api.Token(), apiURL, nil, payload)
 	if err != nil {
 		log.Error.Printf("send time crate post failed:%s", err)
 		return

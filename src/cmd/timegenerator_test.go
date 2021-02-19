@@ -1,7 +1,7 @@
 package main
 
 import (
-	"heimatcli/x/assert"
+	"heimatcli/src/x/assert"
 	"testing"
 
 	"github.com/c-bata/go-prompt"

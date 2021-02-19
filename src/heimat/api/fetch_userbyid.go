@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"heimatcli/heimat"
-	"heimatcli/x/log"
+	"heimatcli/src/heimat"
+	"heimatcli/src/x/log"
 )
 
 // FetchUserByID _
@@ -11,7 +11,7 @@ import (
 func (api *API) FetchUserByID(userID int) *heimat.User {
 	apiURL := api.urlEmployeeByID(userID)
 
-	resp, _, err := httpGet(api.Token(), apiURL, nil)
+	resp, _, err := api.httpGet(api.Token(), apiURL, nil)
 	if err != nil {
 		log.Error.Printf("could not fetch user: %s", err)
 		return nil

@@ -2,8 +2,8 @@ package api
 
 import (
 	"encoding/json"
-	"heimatcli/heimat"
-	"heimatcli/x/log"
+	"heimatcli/src/heimat"
+	"heimatcli/src/x/log"
 	"time"
 )
 
@@ -13,7 +13,7 @@ import (
 func (api *API) FetchProjects() []heimat.Project {
 
 	url := api.urlProjects(api.UserID(), time.Now())
-	resp, _, err := httpGet(api.Token(), url, nil)
+	resp, _, err := api.httpGet(api.Token(), url, nil)
 
 	if err != nil {
 		log.Error.Printf("could not fetch projects: err=%s", err)

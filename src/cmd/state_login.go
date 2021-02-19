@@ -3,8 +3,8 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"heimatcli/heimat/api"
-	"heimatcli/x/log"
+	"heimatcli/src/heimat/api"
+	"heimatcli/src/x/log"
 	"os"
 	"strings"
 
@@ -27,7 +27,7 @@ func NewStateLogin(api *api.API) *StateLogin {
 // Suggestions _
 func (sl StateLogin) Suggestions(in prompt.Document) []prompt.Suggest {
 	return []prompt.Suggest{
-		// {Text: "login", Description: "Login into Heimat"},
+		{Text: "login", Description: "Login into Heimat"},
 	}
 }
 

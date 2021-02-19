@@ -1,7 +1,7 @@
 package api
 
 import (
-	"heimatcli/x/log"
+	"heimatcli/src/x/log"
 	"net/url"
 )
 

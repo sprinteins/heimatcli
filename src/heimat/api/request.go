@@ -2,7 +2,9 @@ package api
 
 import (
 	"bytes"
-	"heimatcli/x/log"
+	"heimatcli/src/x/log"
+	"strings"
+
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -13,28 +15,28 @@ import (
 	"github.com/briandowns/spinner"
 )
 
-func httpPost(
+func (api *API) httpPost(
 	authtoken string,
 	url string,
 	queries []Query,
 	payload []byte,
 ) (*http.Response, []*http.Cookie, error) {
-	return httpRequest(http.MethodPost, authtoken, url, queries, payload)
+	return api.httpRequest(http.MethodPost, authtoken, url, queries, payload)
 }
 
-func httpGet(
+func (api *API) httpGet(
 	authtoken string,
 	url string,
 	queries []Query,
 ) (*http.Response, []*http.Cookie, error) {
 	emptyPayload := make([]byte, 0)
-	return httpRequest(http.MethodGet, authtoken, url, queries, emptyPayload)
+	return api.httpRequest(http.MethodGet, authtoken, url, queries, emptyPayload)
 }
 
 //
 // USE THE PRECONFIGURED METHODS
 //
-func httpRequest(
+func (api *API) httpRequest(
 	method string,
 	authtoken string,
 	url string,
@@ -92,6 +94,12 @@ func httpRequest(
 
 	if err != nil {
 		return nil, emptyCookieJar, err
+	}
+
+	newToken := resp.Header.Get("Authorization")
+	if newToken != "" {
+		newToken = strings.Replace(newToken, "Bearer ", "", 1)
+		api.SetToken(newToken)
 	}
 
 	cookies := jar.Cookies(req.URL)

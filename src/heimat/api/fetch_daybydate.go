@@ -3,8 +3,8 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"heimatcli/heimat"
-	"heimatcli/x/log"
+	"heimatcli/src/heimat"
+	"heimatcli/src/x/log"
 	"time"
 )
 
@@ -19,7 +19,7 @@ func (api *API) FetchDayByDate(date time.Time) *heimat.Day {
 		{key: "end", value: NewHeimatDate(date)},
 	}
 
-	resp, _, err := httpGet(api.Token(), url, queries)
+	resp, _, err := api.httpGet(api.Token(), url, queries)
 
 	if err != nil {
 		log.Error.Printf("Could not fetch projects: %s\n", err.Error())

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"heimatcli/heimat/api"
+	"heimatcli/src/heimat/api"
 
 	prompt "github.com/c-bata/go-prompt"
 )

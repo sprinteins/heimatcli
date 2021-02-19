@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"heimatcli/heimat"
-	"heimatcli/heimat/api"
+	"heimatcli/src/heimat"
+	"heimatcli/src/heimat/api"
 	"regexp"
 	"strings"
 	"time"

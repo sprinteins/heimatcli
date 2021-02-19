@@ -1,7 +1,7 @@
 package main
 
 import (
-	"heimatcli/x/log"
+	"heimatcli/src/x/log"
 
 	"github.com/c-bata/go-prompt"
 )
