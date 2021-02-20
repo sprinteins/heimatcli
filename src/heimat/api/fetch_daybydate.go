@@ -2,21 +2,35 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"heimatcli/src/heimat"
 	"heimatcli/src/x/log"
 	"time"
 )
 
+// FetchMonthByDate _
+func (api *API) FetchMonthByDate(date time.Time) *heimat.Month {
+	start, end := firstLastOfMonth(date)
+
+	return api.fetchDaysByDates(start, end)
+}
+
 // FetchDayByDate _
 // https://heimat-demo.sprinteins.com/api/v1/employees/42/trackedtimes?start=2020-01-01&end=2020-01-31
 func (api *API) FetchDayByDate(date time.Time) *heimat.Day {
 
+	days := api.fetchDaysByDates(date, date)
+	day := findDayByDate(days.TrackedTimesDate, NewHeimatDate(date))
+
+	return day
+
+}
+
+func (api *API) fetchDaysByDates(start, end time.Time) *heimat.Month {
 	url := api.urlDayByDate(api.UserID())
 
 	queries := []Query{
-		{key: "start", value: NewHeimatDate(date)},
-		{key: "end", value: NewHeimatDate(date)},
+		{key: "start", value: NewHeimatDate(start)},
+		{key: "end", value: NewHeimatDate(end)},
 	}
 
 	resp, _, err := api.httpGet(api.Token(), url, queries)
@@ -32,17 +46,14 @@ func (api *API) FetchDayByDate(date time.Time) *heimat.Day {
 	}
 
 	respBodyBytes := readBody(resp)
-	trackedTimes := &trackedTimeResponse{}
-	err = json.Unmarshal(respBodyBytes, trackedTimes)
+	month := &heimat.Month{}
+	err = json.Unmarshal(respBodyBytes, month)
 	if err != nil {
 		log.Error.Printf("could not unmarshal response body: %s\n", err.Error())
 		return nil
 	}
 
-	day := findDayByDate(trackedTimes.TrackedTimesDate, NewHeimatDate(date))
-
-	return day
-
+	return month
 }
 
 func findDayByDate(days []heimat.Day, date string) *heimat.Day {
@@ -56,19 +67,13 @@ func findDayByDate(days []heimat.Day, date string) *heimat.Day {
 
 }
 
-func firstLastOfMonth() (firstDay string, lastDay string) {
-	now := time.Now()
+func firstLastOfMonth(date time.Time) (firstDay, lastDay time.Time) {
+	now := date
 	currentYear, currentMonth, _ := now.Date()
 	currentLocation := now.Location()
 
-	firstOfMonth := time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
-	lastOfMonth := firstOfMonth.AddDate(0, 1, -1)
-
-	fmt.Println(firstOfMonth)
-	fmt.Println(lastOfMonth)
-
-	firstDay = firstOfMonth.Format("2006-01-02")
-	lastDay = lastOfMonth.Format("2006-01-02")
+	firstDay = time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
+	lastDay = firstDay.AddDate(0, 1, -1)
 
 	return firstDay, lastDay
 }
@@ -83,4 +88,14 @@ type HeimatDate = string
 // NewHeimatDate _
 func NewHeimatDate(date time.Time) HeimatDate {
 	return HeimatDate(date.Format("2006-01-02"))
+}
+
+// DateFromHeimatDate _
+func DateFromHeimatDate(heimatDate string) time.Time {
+	d, err := time.Parse("2006-01-02", heimatDate)
+	if err != nil {
+		log.Error.Printf("could not parse heimat date to date: %s", err)
+		return time.Time{}
+	}
+	return d
 }
