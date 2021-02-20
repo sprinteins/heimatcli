@@ -6,11 +6,10 @@ import (
 	"heimatcli/src/heimat/api"
 	"heimatcli/src/x/log"
 	"regexp"
-	"sort"
+	"strconv"
 	"strings"
 	"time"
 
-	"github.com/alexeyco/simpletable"
 	prompt "github.com/c-bata/go-prompt"
 )
 
@@ -71,8 +70,8 @@ func (sh StateHome) Exe(in string) StateKey {
 	cmd := normalizeCommand(in)
 
 	if strings.Contains(cmd, "time show day") {
-
-		day := sh.api.FetchDayByDate(time.Now())
+		date := dateFromCommand(cmd, "time show day")
+		day := sh.api.FetchDayByDate(date)
 		if day == nil {
 			return stateKeyNoChange
 		}
@@ -94,6 +93,8 @@ func (sh StateHome) Exe(in string) StateKey {
 	}
 
 	if strings.Contains(cmd, "time add") {
+		date := dateFromCommand(cmd, "time add")
+		stateTimeAddSetTime <- date
 		return stateKeyTimeAdd
 	}
 
@@ -109,63 +110,8 @@ func normalizeCommand(cmd string) string {
 	return strings.TrimSpace(withSingleSpaces)
 }
 
-func printDay(day *heimat.Day) {
-
-	printHeimatDate(day.Date)
-
-	table := simpletable.New()
-
-	table.Header = &simpletable.Header{
-		Cells: []*simpletable.Cell{
-			{Align: simpletable.AlignCenter, Text: "Start"},
-			{Align: simpletable.AlignCenter, Text: "End"},
-			{Align: simpletable.AlignCenter, Text: "Duration"},
-			{Align: simpletable.AlignCenter, Text: "Project"},
-			{Align: simpletable.AlignCenter, Text: "Task"},
-			{Align: simpletable.AlignCenter, Text: "Notes"},
-		},
-	}
-
-	var subTime time.Duration
-	for _, tt := range day.TrackedTimes {
-		// start, _ := time.Parse("15:04", tt.Start)
-		// end, _ := time.Parse("15:04", tt.End)
-		// diff := end.Sub(start)
-		dur := calcDuration(tt.Start, tt.End)
-		subTime = subTime + dur
-
-		r := []*simpletable.Cell{
-			{Align: simpletable.AlignRight, Text: tt.Start},
-			{Align: simpletable.AlignRight, Text: tt.End},
-			{Align: simpletable.AlignLeft, Text: dur.String()},
-			{Align: simpletable.AlignLeft, Text: tt.Project.Name},
-			{Align: simpletable.AlignLeft, Text: tt.Task.Name},
-			{Align: simpletable.AlignLeft, Text: tt.Note},
-		}
-		table.Body.Cells = append(table.Body.Cells, r)
-
-	}
-
-	table.Footer = &simpletable.Footer{
-		Cells: []*simpletable.Cell{
-			{Align: simpletable.AlignRight, Text: "Sum:"},
-			{Align: simpletable.AlignLeft, Text: fmt.Sprintf("%s", subTime)},
-			{},
-			{},
-			{},
-			{},
-		},
-	}
-
-	table.SetStyle(simpletable.StyleCompactLite)
-	fmt.Println(table.String())
-}
-
 func printHeimatDate(d string) {
-	date, err := time.Parse("2006-01-02", d)
-	if err != nil {
-		log.Error.Printf("could not parse heimat date: %s", err)
-	}
+	date := api.DateFromHeimatDate(d)
 	dateString := date.Format("2006-01-02 (Mon)")
 
 	fmt.Printf("\n%s\n\n", dateString)
@@ -175,129 +121,37 @@ func printUser(u *heimat.User) {
 	fmt.Printf("%#v\n", u)
 }
 
-func printMonth(month *heimat.Month) {
-
-	sort.Sort(byDate(month.TrackedTimesDate))
-	emptyRow := []*simpletable.Cell{
-		{},
-		{},
-		{},
-		{},
+func dateFromCommand(cmd string, strToRemove string) time.Time {
+	rest := strings.Replace(cmd, strToRemove, "", 1)
+	rest = strings.TrimSpace(rest)
+	if rest == "" {
+		return time.Now()
 	}
 
-	d := api.DateFromHeimatDate(month.TrackedTimesDate[0].Date)
-	yearMonth := d.Format("2006 01 (Jan)")
-	fmt.Printf("%s\n", yearMonth)
-	fmt.Printf("\n")
-
-	table := simpletable.New()
-	table.Header = &simpletable.Header{
-		Cells: []*simpletable.Cell{
-			{Align: simpletable.AlignCenter, Text: "Day"},
-			{Align: simpletable.AlignCenter, Text: "Time"},
-			{Align: simpletable.AlignCenter, Text: "Duration"},
-			{Align: simpletable.AlignCenter, Text: "Task"},
-		},
+	if isRelativeDate(rest) {
+		diff, err := strconv.Atoi(rest)
+		if err != nil {
+			log.Error.Printf("could not parse relative date: %s\n", err)
+			return time.Now()
+		}
+		return time.Now().AddDate(0, 0, diff)
 	}
 
-	for _, day := range month.TrackedTimesDate {
-
-		d = api.DateFromHeimatDate(day.Date)
-		dayDate := d.Format("02 (Mon)")
-
-		if len(day.TrackedTimes) == 0 {
-			row := []*simpletable.Cell{
-				{Align: simpletable.AlignLeft, Text: dayDate},
-				{Align: simpletable.AlignLeft, Text: "-"},
-				{Align: simpletable.AlignLeft, Text: ""},
-				{Align: simpletable.AlignLeft, Text: ""},
-			}
-			table.Body.Cells = append(table.Body.Cells, row)
-			table.Body.Cells = append(table.Body.Cells, emptyRow)
-			continue
-		}
-
-		var dailySum time.Duration
-
-		for tti, trackedTime := range day.TrackedTimes {
-
-			dur := calcDuration(trackedTime.Start, trackedTime.End)
-			dailySum = dailySum + dur
-
-			row := make([]*simpletable.Cell, 4)
-			if tti == 0 {
-				row[0] = &simpletable.Cell{
-					Align: simpletable.AlignLeft,
-					Text:  dayDate,
-				}
-			} else {
-				row[0] = &simpletable.Cell{}
-			}
-
-			timeCell := renderTime(trackedTime)
-			row[1] = &simpletable.Cell{
-				Align: simpletable.AlignLeft,
-				Text:  timeCell,
-			}
-
-			durationCell := renderDuration(trackedTime)
-			row[2] = &simpletable.Cell{
-				Align: simpletable.AlignLeft,
-				Text:  durationCell,
-			}
-			taskCell := renderTrackedTime(trackedTime)
-			row[3] = &simpletable.Cell{
-				Align: simpletable.AlignLeft,
-				Text:  taskCell,
-			}
-
-			table.Body.Cells = append(table.Body.Cells, row)
-		}
-
-		dailySumRow := []*simpletable.Cell{
-			{},
-			{Align: simpletable.AlignRight, Text: "Sum:"},
-			{Align: simpletable.AlignLeft, Text: "[" + dailySum.String() + "]"},
-			{},
-		}
-		table.Body.Cells = append(table.Body.Cells, dailySumRow)
-
-		table.Body.Cells = append(table.Body.Cells, emptyRow)
-
+	day, err := strconv.Atoi(rest)
+	if err != nil {
+		log.Error.Printf("could not parse into day: %s\n", err)
 	}
-
-	table.SetStyle(simpletable.StyleCompactLite)
-	fmt.Println(table.String())
+	now := time.Now()
+	year, month, _ := now.Date()
+	dateStr := fmt.Sprintf("%d-%d-%d", year, month, day)
+	newDate, err := time.Parse("2006-1-2", dateStr)
+	if err != nil {
+		log.Error.Printf("could not create new date from absolute date:%s", err)
+	}
+	return newDate
 }
 
-func renderTrackedTime(te heimat.TrackEntry) string {
-	return fmt.Sprintf("%s %s", te.Project.Name, te.Task.Name)
-}
-func renderTime(te heimat.TrackEntry) string {
-	return fmt.Sprintf("%s-%s", te.Start, te.End)
-}
-
-func renderDuration(te heimat.TrackEntry) string {
-	dur := calcDuration(te.Start, te.End)
-	return fmt.Sprintf("%s", dur.String())
-
-}
-
-func calcDuration(s, e string) time.Duration {
-	start, _ := time.Parse("15:04", s)
-	end, _ := time.Parse("15:04", e)
-	dur := end.Sub(start)
-	return dur
-}
-
-type byDate []heimat.Day
-
-func (s byDate) Len() int {
-	return len(s)
-}
-func (s byDate) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-func (s byDate) Less(i, j int) bool {
-	return s[i].Date < s[j].Date
+func isRelativeDate(d string) bool {
+	relativeDate := regexp.MustCompile(`^(\+|-)\d*$`)
+	return relativeDate.Match([]byte(d))
 }

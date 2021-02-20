@@ -15,8 +15,11 @@ import (
 type StateTimeAdd struct {
 	api      *api.API
 	projects []heimat.Project
+	date     time.Time
 	cancel   func()
 }
+
+var stateTimeAddSetTime = make(chan time.Time, 1)
 
 // NewStateTimeAdd _
 func NewStateTimeAdd(api *api.API, cancelFn func()) *StateTimeAdd {
@@ -71,7 +74,12 @@ func (sta StateTimeAdd) Suggestions(in prompt.Document) []prompt.Suggest {
 
 // Prefix _
 func (sta StateTimeAdd) Prefix() string {
-	return "Heimat > time add > "
+	if sameDay(sta.date) {
+		return "Heimat > time add > "
+	}
+
+	monthDay := sta.date.Format("01.02")
+	return fmt.Sprintf("Heimat > time add (%s) > ", monthDay)
 }
 
 // Exe _
@@ -110,11 +118,10 @@ func (sta StateTimeAdd) Exe(in string) StateKey {
 		return stateKeyNoChange
 	}
 
-	date := time.Now()
-
+	date := sta.date
 	sta.api.SendCreateTime(sta.api.UserID(), date, start, end, note, *task)
 
-	day := sta.api.FetchDayByDate(time.Now())
+	day := sta.api.FetchDayByDate(sta.date)
 
 	printDay(day)
 
@@ -123,7 +130,16 @@ func (sta StateTimeAdd) Exe(in string) StateKey {
 
 // Init _
 func (sta *StateTimeAdd) Init() {
+	date := <-stateTimeAddSetTime
+	sta.date = date
 	sta.projects = sta.api.FetchProjects()
+}
+
+func sameDay(d time.Time) bool {
+	layout := "2006-01-02"
+	dStr := d.Format(layout)
+	nowStr := time.Now().Format(layout)
+	return dStr == nowStr
 }
 
 func (sta StateTimeAdd) findProject(cmd string) *heimat.Project {
