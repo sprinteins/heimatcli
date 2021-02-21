@@ -1,5 +1,7 @@
 package heimat
 
+import "fmt"
+
 // User _
 type User struct {
 	ID                 int                `json:"id"`
@@ -17,10 +19,15 @@ type User struct {
 	PSL                PSL                `json:"peopleSuccessLead"`
 	IsPSL              bool               `json:"isPeopleSuccessLead"`
 	Image              string             `json:"image"`
-	imageExtension     string             `json:"imageExtension"`
+	ImageExtension     string             `json:"imageExtension"`
 	LeadRoles          []LeadRole         `json:"leadRoles"`
 	CSLProps           []CSLProp          `json:"customerSuccessLeadProperties"`
 	EmploymentDuration EmploymentDuration `json:"employmentDuration"`
+}
+
+// Name _
+func (u User) Name() string {
+	return fmt.Sprintf("%s %s", u.FirstName, u.LastName)
 }
 
 // Location _

@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	prompt "github.com/c-bata/go-prompt"
@@ -88,8 +89,23 @@ func (sh StateHome) Exe(in string) StateKey {
 	}
 
 	if strings.Contains(cmd, "profile") {
-		u := sh.api.FetchUserByID(sh.api.UserID())
-		printUser(u)
+		var u *heimat.User
+		var b *heimat.Balances
+		var wg sync.WaitGroup
+		wg.Add(2)
+
+		go func() {
+			u = sh.api.FetchUserByID(sh.api.UserID())
+			wg.Done()
+		}()
+
+		go func() {
+			b = sh.api.FetchBalances(time.Now())
+			wg.Done()
+		}()
+
+		wg.Wait()
+		printProfile(u, b)
 	}
 
 	if strings.Contains(cmd, "time add") {
@@ -115,10 +131,6 @@ func printHeimatDate(d string) {
 	dateString := date.Format("2006-01-02 (Mon)")
 
 	fmt.Printf("\n%s\n\n", dateString)
-}
-
-func printUser(u *heimat.User) {
-	fmt.Printf("%#v\n", u)
 }
 
 func dateFromCommand(cmd string, strToRemove string) time.Time {

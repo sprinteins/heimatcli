@@ -19,6 +19,9 @@ func (api *API) FetchMonthByDate(date time.Time) *heimat.Month {
 func (api *API) FetchDayByDate(date time.Time) *heimat.Day {
 
 	days := api.fetchDaysByDates(date, date)
+	if days == nil {
+		return nil
+	}
 	day := findDayByDate(days.TrackedTimesDate, NewHeimatDate(date))
 
 	return day
