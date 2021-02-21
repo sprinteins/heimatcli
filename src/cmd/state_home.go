@@ -29,7 +29,6 @@ func NewStateHome(api *api.API) *StateHome {
 // Suggestions _
 func (sh StateHome) Suggestions(in prompt.Document) []prompt.Suggest {
 
-	// cmd := in.GetWordBeforeCursorWithSpace()
 	cmd := normalizeCommand(in.Text)
 
 	if strings.Contains(cmd, "time show") {
