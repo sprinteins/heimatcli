@@ -75,7 +75,7 @@ func (sta StateTimeAdd) Suggestions(in prompt.Document) []prompt.Suggest {
 // Prefix _
 func (sta StateTimeAdd) Prefix() string {
 	if sameDay(sta.date) {
-		return "Heimat > time add > "
+		return "heimat > time add > "
 	}
 
 	monthDay := sta.date.Format("01.02")
