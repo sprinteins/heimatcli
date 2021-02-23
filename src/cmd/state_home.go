@@ -30,6 +30,7 @@ func NewStateHome(api *api.API) *StateHome {
 func (sh StateHome) Suggestions(in prompt.Document) []prompt.Suggest {
 
 	cmd := normalizeCommand(in.Text)
+	noSuggestions := []prompt.Suggest{}
 
 	if strings.Contains(cmd, "time show") {
 		return []prompt.Suggest{
@@ -39,18 +40,23 @@ func (sh StateHome) Suggestions(in prompt.Document) []prompt.Suggest {
 	}
 
 	if strings.Contains(cmd, "time add") {
-		return []prompt.Suggest{}
+		return noSuggestions
+	}
+
+	if strings.Contains(cmd, "profile") {
+		return noSuggestions
+	}
+
+	if strings.Contains(cmd, "time copy") {
+		return noSuggestions
 	}
 
 	if strings.Contains(cmd, "time") {
 		return []prompt.Suggest{
 			{Text: "show", Description: "Show Tracked Time"},
 			{Text: "add", Description: "Add Time"},
+			{Text: "copy", Description: "Copy a day"},
 		}
-	}
-
-	if strings.Contains(cmd, "profile") {
-		return []prompt.Suggest{}
 	}
 
 	return []prompt.Suggest{
@@ -113,6 +119,37 @@ func (sh StateHome) Exe(in string) StateKey {
 		return stateKeyTimeAdd
 	}
 
+	if strings.Contains(cmd, "time copy") {
+		sourceDate, targetDate := sourceAndTargetDateFromCMD(cmd, "time copy")
+		if sourceDate == nil {
+			log.Error.Printf("could not determine source date")
+			return stateKeyNoChange
+		}
+
+		if targetDate == nil {
+			log.Error.Printf("could not determine target date")
+			return stateKeyNoChange
+		}
+
+		sourceDay := sh.api.FetchDayByDate(*sourceDate)
+
+		var wg sync.WaitGroup
+		wg.Add(len(sourceDay.TrackedTimes))
+		for _, tt := range sourceDay.TrackedTimes {
+			go func(tt heimat.TrackEntry) {
+				sh.api.SendCreateTime(sh.api.UserID(), *targetDate, tt.Start, tt.End, tt.Note, tt.Task)
+				wg.Done()
+			}(tt)
+		}
+		wg.Wait()
+
+		day := sh.api.FetchDayByDate(*targetDate)
+		printDay(day)
+
+		// TODO: fetch time from source date and crate on target date
+		return stateKeyNoChange
+	}
+
 	return stateKeyNoChange
 }
 
@@ -125,13 +162,9 @@ func normalizeCommand(cmd string) string {
 	return strings.TrimSpace(withSingleSpaces)
 }
 
-func printHeimatDate(d string) {
-	date := api.DateFromHeimatDate(d)
-	dateString := date.Format("2006-01-02 (Mon)")
-
-	fmt.Printf("\n%s\n\n", dateString)
-}
-
+//
+// TIME ADD
+//
 func dateFromCommand(cmd string, strToRemove string) time.Time {
 	rest := strings.Replace(cmd, strToRemove, "", 1)
 	rest = strings.TrimSpace(rest)
@@ -139,16 +172,34 @@ func dateFromCommand(cmd string, strToRemove string) time.Time {
 		return time.Now()
 	}
 
-	if isRelativeDate(rest) {
-		diff, err := strconv.Atoi(rest)
-		if err != nil {
-			log.Error.Printf("could not parse relative date: %s\n", err)
-			return time.Now()
-		}
-		return time.Now().AddDate(0, 0, diff)
-	}
+	return calcDateFromString(rest)
+}
 
-	day, err := strconv.Atoi(rest)
+func isRelativeDate(d string) bool {
+	relativeDate := regexp.MustCompile(`^(\+|-)\d*$`)
+	return relativeDate.Match([]byte(d))
+}
+
+func calcDateFromString(dateStr string) time.Time {
+
+	if isRelativeDate(dateStr) || dateStr == "0" {
+		return calcRelativeDate(dateStr)
+	}
+	return calcAbsoluteDate(dateStr)
+
+}
+
+func calcRelativeDate(relativeDate string) time.Time {
+	diff, err := strconv.Atoi(relativeDate)
+	if err != nil {
+		log.Error.Printf("could not parse relative date: %s\n", err)
+		return time.Now()
+	}
+	return time.Now().AddDate(0, 0, diff)
+}
+
+func calcAbsoluteDate(absDate string) time.Time {
+	day, err := strconv.Atoi(absDate)
 	if err != nil {
 		log.Error.Printf("could not parse into day: %s\n", err)
 	}
@@ -162,7 +213,31 @@ func dateFromCommand(cmd string, strToRemove string) time.Time {
 	return newDate
 }
 
-func isRelativeDate(d string) bool {
-	relativeDate := regexp.MustCompile(`^(\+|-)\d*$`)
-	return relativeDate.Match([]byte(d))
+//
+// TIME COPY
+//
+func sourceAndTargetDateFromCMD(cmd string, baseCMD string) (source, target *time.Time) {
+	rest := strings.Replace(cmd, baseCMD, "", 1)
+	rest = strings.TrimSpace(rest)
+	if rest == "" {
+		return nil, nil
+	}
+
+	dayDates := regexp.MustCompile(`(\+|-)?\d+`)
+	dates := dayDates.FindAll([]byte(rest), 2)
+
+	if len(dates) == 1 {
+		s := calcDateFromString(string(dates[0]))
+		t := time.Now()
+		return &s, &t
+	}
+
+	if len(dates) == 2 {
+		s := calcDateFromString(string(dates[0]))
+		t := calcDateFromString(string(dates[1]))
+		return &s, &t
+	}
+
+	return nil, nil
+
 }

@@ -8,7 +8,7 @@ import (
 
 func completer(in prompt.Document) []prompt.Suggest {
 	s := sm.currentState.Suggestions(in)
-	return prompt.FilterHasPrefix(s, in.GetWordBeforeCursor(), true)
+	return prompt.FilterFuzzy(s, in.GetWordBeforeCursor(), true)
 }
 
 var LivePrefixState struct {

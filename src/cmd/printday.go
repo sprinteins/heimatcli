@@ -3,10 +3,18 @@ package main
 import (
 	"fmt"
 	"heimatcli/src/heimat"
+	"heimatcli/src/heimat/api"
 	"time"
 
 	"github.com/alexeyco/simpletable"
 )
+
+func printHeimatDate(d string) {
+	date := api.DateFromHeimatDate(d)
+	dateString := date.Format("2006-01-02 (Mon)")
+
+	fmt.Printf("\n%s\n\n", dateString)
+}
 
 func printDay(day *heimat.Day) {
 
