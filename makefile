@@ -6,3 +6,6 @@ build:
 
 install: build
 	@cp ./heimatcli ~/go/bin/heimat
+
+release:
+	goreleaser --rm-dist

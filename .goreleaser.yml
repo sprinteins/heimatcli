@@ -1,13 +1,16 @@
-# This is an example .goreleaser.yml file with some sane defaults.
-# Make sure to check the documentation at http://goreleaser.com
+# Documentation at http://goreleaser.com
+env_files:
+  github_token: ~/.github-tokens/heimatcli
 before:
   hooks:
-    # You may remove this if you don't use go modules.
-    - go mod download
+    # you may remove this if you don't use vgo
+    # - go mod download
     # you may remove this if you don't need go generate
     # - go generate ./...
 builds:
-  - env:
+  - main: ./src/cmd
+    binary: heimat
+    env:
       - CGO_ENABLED=0
     goos:
       - linux
@@ -30,3 +33,8 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+brews:
+  - tap:
+      owner: sprinteins
+      name: heimatcli
+  - description: "A CLI/REPL Client for Heimat"
