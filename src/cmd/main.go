@@ -54,7 +54,7 @@ func main() {
 		completer,
 		prompt.OptionPrefix(">>> "),
 		prompt.OptionLivePrefix(changeLivePrefix),
-		prompt.OptionTitle("live-prefix-example"),
+		prompt.OptionTitle("Heimat"),
 		prompt.OptionSwitchKeyBindMode(prompt.CommonKeyBind),
 		prompt.OptionAddKeyBind(prompt.KeyBind{
 			Key: prompt.Escape,
