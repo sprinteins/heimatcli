@@ -74,3 +74,9 @@ func (api *API) isTokenValid() bool {
 
 	return user != nil
 }
+
+// Logout logs out the user and removes the persisted token
+func (api *API) Logout() {
+	api.SetToken("")
+	removeToken()
+}

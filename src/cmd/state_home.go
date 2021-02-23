@@ -32,11 +32,12 @@ func (sh StateHome) Suggestions(in prompt.Document) []prompt.Suggest {
 	cmd := normalizeCommand(in.Text)
 	noSuggestions := []prompt.Suggest{}
 
-	if strings.Contains(cmd, "time show") {
-		return []prompt.Suggest{
-			{Text: "day", Description: "Show Day"},
-			{Text: "month", Description: "Show Month"},
-		}
+	if strings.Contains(cmd, "time show day") {
+		return noSuggestions
+	}
+
+	if strings.Contains(cmd, "time show month") {
+		return noSuggestions
 	}
 
 	if strings.Contains(cmd, "time add") {
@@ -51,6 +52,13 @@ func (sh StateHome) Suggestions(in prompt.Document) []prompt.Suggest {
 		return noSuggestions
 	}
 
+	if strings.Contains(cmd, "time show") {
+		return []prompt.Suggest{
+			{Text: "day", Description: "Show Day"},
+			{Text: "month", Description: "Show Month"},
+		}
+	}
+
 	if strings.Contains(cmd, "time") {
 		return []prompt.Suggest{
 			{Text: "show", Description: "Show Tracked Time"},
@@ -59,9 +67,14 @@ func (sh StateHome) Suggestions(in prompt.Document) []prompt.Suggest {
 		}
 	}
 
+	if strings.Contains(cmd, "logout") {
+		return noSuggestions
+	}
+
 	return []prompt.Suggest{
 		{Text: "time", Description: "Time Tracking"},
 		{Text: "profile", Description: "Show the profile and stats about the user"},
+		{Text: "logout", Description: "Logout"},
 	}
 }
 
@@ -148,6 +161,12 @@ func (sh StateHome) Exe(in string) StateKey {
 
 		// TODO: fetch time from source date and crate on target date
 		return stateKeyNoChange
+	}
+
+	if strings.Contains(cmd, "logout") {
+		sh.api.Logout()
+		fmt.Printf("Good bye! 👋\n")
+		return stateKeyLogin
 	}
 
 	return stateKeyNoChange

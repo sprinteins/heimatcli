@@ -19,6 +19,10 @@ func readToken() string {
 	return string(readFile(filePath))
 }
 
+func removeToken() {
+	writeFile(filePath, []byte(""))
+}
+
 func writeFile(path string, content []byte) {
 
 	err := ioutil.WriteFile(path, []byte(content), 0644)
