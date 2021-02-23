@@ -4,6 +4,20 @@ The Heimat CLI is a CLI/REPL client for [SprintEins'](https://www.sprinteins.com
 It uses the heimat's REST API. 
 It helps you quickly track your times in heimat with the help of autocomplete.
 
+## Install
+
+You can install the heimat CLI with homebrew
+
+```sh
+brew install sprinteins/tap/heimatcli
+```
+
+in terminal:
+
+```sh
+heimat
+```
+
 ## Features
 
 - track times
