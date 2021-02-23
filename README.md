@@ -4,6 +4,8 @@ The Heimat CLI is a CLI/REPL client for [SprintEins'](https://www.sprinteins.com
 
 ## Feature
 
-### Show Tracked Times of Today
-
-![](_readmeassets/feature-time-show-day-0.gif)
+- track times
+- show tracked times per day
+- show tracked time per month
+- copy tracked times from a day to another one
+- show profile and stats of logged in user
