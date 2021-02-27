@@ -27,13 +27,13 @@ func printProfile(u *heimat.User, b *heimat.Balances) {
 	table.Body.Cells = append(table.Body.Cells, emptyRow)
 
 	workingHoursRow := []*simpletable.Cell{
-		{Align: simpletable.AlignRight, Text: "Worked Hours:"},
+		{Align: simpletable.AlignRight, Text: "Worked hours:"},
 		{Align: simpletable.AlignLeft, Text: fmt.Sprintf("%.2f", b.WorkingHours)},
 	}
 	table.Body.Cells = append(table.Body.Cells, workingHoursRow)
 
 	plannedHoursRow := []*simpletable.Cell{
-		{Align: simpletable.AlignRight, Text: "Planned Hours:"},
+		{Align: simpletable.AlignRight, Text: "Planned hours:"},
 		{Align: simpletable.AlignLeft, Text: fmt.Sprintf("%.2f", b.PlannedWorkingHours)},
 	}
 	table.Body.Cells = append(table.Body.Cells, plannedHoursRow)
@@ -51,13 +51,13 @@ func printProfile(u *heimat.User, b *heimat.Balances) {
 	table.Body.Cells = append(table.Body.Cells, balanceRow)
 
 	holidaysRow := []*simpletable.Cell{
-		{Align: simpletable.AlignRight, Text: "Holidays:"},
+		{Align: simpletable.AlignRight, Text: "Vacation days left:"},
 		{Align: simpletable.AlignLeft, Text: fmt.Sprintf("%.2f", b.HolidayEntitlement)},
 	}
 	table.Body.Cells = append(table.Body.Cells, holidaysRow)
 
 	holidaysTookRow := []*simpletable.Cell{
-		{Align: simpletable.AlignRight, Text: "Holiday Took:"},
+		{Align: simpletable.AlignRight, Text: "Vacation days taken:"},
 		{Align: simpletable.AlignLeft, Text: fmt.Sprintf("%.2f", b.Holidays)},
 	}
 	table.Body.Cells = append(table.Body.Cells, holidaysTookRow)
