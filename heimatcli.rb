@@ -22,6 +22,6 @@ class Heimatcli < Formula
   end
 
   def install
-    bin.install "heimatcli"
+    bin.install "heimat"
   end
 end
