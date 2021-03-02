@@ -1,4 +1,4 @@
-package main
+package print
 
 import (
 	"fmt"
@@ -7,7 +7,8 @@ import (
 	"github.com/alexeyco/simpletable"
 )
 
-func printProfile(u *heimat.User, b *heimat.Balances) {
+// Profile prints the profile and time balances of a given user
+func Profile(u *heimat.User, b *heimat.Balances) {
 	table := simpletable.New()
 	emptyRow := []*simpletable.Cell{{}, {}}
 

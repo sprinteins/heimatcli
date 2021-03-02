@@ -1,24 +1,17 @@
-package main
+package print
 
 import (
 	"fmt"
 	"heimatcli/src/heimat"
-	"heimatcli/src/heimat/api"
+	"heimatcli/src/heimat/calc"
 	"time"
 
 	"github.com/alexeyco/simpletable"
 )
 
-func printHeimatDate(d string) {
-	date := api.DateFromHeimatDate(d)
-	dateString := date.Format("2006-01-02 (Mon)")
+func Day(day *heimat.Day) {
 
-	fmt.Printf("\n%s\n\n", dateString)
-}
-
-func printDay(day *heimat.Day) {
-
-	printHeimatDate(day.Date)
+	HeimatDate(day.Date)
 
 	table := simpletable.New()
 
@@ -35,7 +28,7 @@ func printDay(day *heimat.Day) {
 
 	var subTime time.Duration
 	for _, tt := range day.TrackedTimes {
-		dur := calcDuration(tt.Start, tt.End)
+		dur := calc.Duration(tt.Start, tt.End)
 		subTime = subTime + dur
 
 		r := []*simpletable.Cell{

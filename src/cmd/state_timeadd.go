@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"heimatcli/src/heimat"
 	"heimatcli/src/heimat/api"
+	"heimatcli/src/heimat/print"
 	"regexp"
 	"strings"
 	"time"
@@ -123,7 +124,7 @@ func (sta StateTimeAdd) Exe(in string) StateKey {
 
 	day := sta.api.FetchDayByDate(sta.date)
 
-	printDay(day)
+	print.Day(day)
 
 	return stateKeyNoChange
 }

@@ -1,16 +1,18 @@
-package main
+package print
 
 import (
 	"fmt"
 	"heimatcli/src/heimat"
 	"heimatcli/src/heimat/api"
+	"heimatcli/src/heimat/calc"
 	"sort"
 	"time"
 
 	"github.com/alexeyco/simpletable"
 )
 
-func printMonth(month *heimat.Month) {
+// Month prints the mont to the terminal
+func Month(month *heimat.Month) {
 
 	sort.Sort(byDate(month.TrackedTimesDate))
 	emptyRow := []*simpletable.Cell{
@@ -56,7 +58,7 @@ func printMonth(month *heimat.Month) {
 
 		for tti, trackedTime := range day.TrackedTimes {
 
-			dur := calcDuration(trackedTime.Start, trackedTime.End)
+			dur := calc.Duration(trackedTime.Start, trackedTime.End)
 			dailySum = dailySum + dur
 
 			row := make([]*simpletable.Cell, 4)
@@ -113,15 +115,8 @@ func renderTime(te heimat.TrackEntry) string {
 }
 
 func renderDuration(te heimat.TrackEntry) string {
-	dur := calcDuration(te.Start, te.End)
+	dur := calc.Duration(te.Start, te.End)
 	return fmt.Sprintf("%s", dur.String())
-}
-
-func calcDuration(s, e string) time.Duration {
-	start, _ := time.Parse("15:04", s)
-	end, _ := time.Parse("15:04", e)
-	dur := end.Sub(start)
-	return dur
 }
 
 type byDate []heimat.Day

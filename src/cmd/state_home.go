@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"heimatcli/src/heimat"
 	"heimatcli/src/heimat/api"
+	"heimatcli/src/heimat/print"
 	"heimatcli/src/x/log"
 	"regexp"
 	"strconv"
@@ -94,7 +95,7 @@ func (sh StateHome) Exe(in string) StateKey {
 		if day == nil {
 			return stateKeyNoChange
 		}
-		printDay(day)
+		print.Day(day)
 
 	}
 
@@ -103,7 +104,7 @@ func (sh StateHome) Exe(in string) StateKey {
 		if month == nil {
 			return stateKeyNoChange
 		}
-		printMonth(month)
+		print.Month(month)
 	}
 
 	if strings.Contains(cmd, "profile") {
@@ -123,7 +124,7 @@ func (sh StateHome) Exe(in string) StateKey {
 		}()
 
 		wg.Wait()
-		printProfile(u, b)
+		print.Profile(u, b)
 	}
 
 	if strings.Contains(cmd, "time add") {
@@ -157,7 +158,7 @@ func (sh StateHome) Exe(in string) StateKey {
 		wg.Wait()
 
 		day := sh.api.FetchDayByDate(*targetDate)
-		printDay(day)
+		print.Day(day)
 
 		// TODO: fetch time from source date and crate on target date
 		return stateKeyNoChange
