@@ -17,14 +17,29 @@ import (
 
 // StateHome _
 type StateHome struct {
-	api *api.API
+	api      *api.API
+	commands map[string]commandFn
 }
+
+type commandFn = func(cmd string) *StateKey
 
 // NewStateHome _
 func NewStateHome(api *api.API) *StateHome {
-	return &StateHome{
+
+	sh := &StateHome{
 		api: api,
 	}
+
+	sh.commands = map[string]commandFn{
+		"time show day":   sh.showDay,
+		"time show month": sh.showMonth,
+		"time add":        sh.changeToTimeAdd,
+		"time copy":       sh.copyTime,
+		"profile":         sh.showProfile,
+		"logout":          sh.logout,
+	}
+
+	return sh
 }
 
 // Suggestions _
@@ -88,89 +103,104 @@ func (sh StateHome) Prefix() string {
 func (sh StateHome) Exe(in string) StateKey {
 
 	cmd := normalizeCommand(in)
+	var newKey *StateKey
 
-	if strings.Contains(cmd, "time show day") {
-		date := dateFromCommand(cmd, "time show day")
-		day := sh.api.FetchDayByDate(date)
-		if day == nil {
-			return stateKeyNoChange
+	for key, command := range sh.commands {
+		if strings.Contains(cmd, key) {
+			newKey = command(cmd)
+			break
 		}
-		print.Day(day)
-
 	}
 
-	if strings.Contains(cmd, "time show month") {
-		month := sh.api.FetchMonthByDate(time.Now())
-		if month == nil {
-			return stateKeyNoChange
-		}
-		print.Month(month)
+	defaultKey := stateKeyNoChange
+	if newKey == nil {
+		return defaultKey
+	}
+	return *newKey
+}
+
+func (sh StateHome) showDay(cmd string) *StateKey {
+	date := dateFromCommand(cmd, "time show day")
+	day := sh.api.FetchDayByDate(date)
+	if day == nil {
+		return nil
+	}
+	print.Day(day)
+	return nil
+}
+
+func (sh StateHome) showMonth(cmd string) *StateKey {
+	month := sh.api.FetchMonthByDate(time.Now())
+	if month == nil {
+		return nil
+	}
+	print.Month(month)
+	return nil
+}
+
+func (sh StateHome) showProfile(cmd string) *StateKey {
+	var u *heimat.User
+	var b *heimat.Balances
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		u = sh.api.FetchUserByID(sh.api.UserID())
+		wg.Done()
+	}()
+
+	go func() {
+		b = sh.api.FetchBalances(time.Now())
+		wg.Done()
+	}()
+
+	wg.Wait()
+	print.Profile(u, b)
+	return nil
+}
+
+func (sh StateHome) changeToTimeAdd(cmd string) *StateKey {
+	date := dateFromCommand(cmd, "time add")
+	stateTimeAddSetTime <- date
+	newKey := stateKeyTimeAdd
+	return &newKey
+}
+
+func (sh StateHome) copyTime(cmd string) *StateKey {
+	sourceDate, targetDate := sourceAndTargetDateFromCMD(cmd, "time copy")
+	if sourceDate == nil {
+		log.Error.Printf("could not determine source date")
+		return nil
 	}
 
-	if strings.Contains(cmd, "profile") {
-		var u *heimat.User
-		var b *heimat.Balances
-		var wg sync.WaitGroup
-		wg.Add(2)
+	if targetDate == nil {
+		log.Error.Printf("could not determine target date")
+		return nil
+	}
 
-		go func() {
-			u = sh.api.FetchUserByID(sh.api.UserID())
+	sourceDay := sh.api.FetchDayByDate(*sourceDate)
+
+	var wg sync.WaitGroup
+	wg.Add(len(sourceDay.TrackedTimes))
+	for _, tt := range sourceDay.TrackedTimes {
+		go func(tt heimat.TrackEntry) {
+			sh.api.SendCreateTime(sh.api.UserID(), *targetDate, tt.Start, tt.End, tt.Note, tt.Task)
 			wg.Done()
-		}()
-
-		go func() {
-			b = sh.api.FetchBalances(time.Now())
-			wg.Done()
-		}()
-
-		wg.Wait()
-		print.Profile(u, b)
+		}(tt)
 	}
+	wg.Wait()
 
-	if strings.Contains(cmd, "time add") {
-		date := dateFromCommand(cmd, "time add")
-		stateTimeAddSetTime <- date
-		return stateKeyTimeAdd
-	}
+	day := sh.api.FetchDayByDate(*targetDate)
+	print.Day(day)
 
-	if strings.Contains(cmd, "time copy") {
-		sourceDate, targetDate := sourceAndTargetDateFromCMD(cmd, "time copy")
-		if sourceDate == nil {
-			log.Error.Printf("could not determine source date")
-			return stateKeyNoChange
-		}
+	return nil
+}
 
-		if targetDate == nil {
-			log.Error.Printf("could not determine target date")
-			return stateKeyNoChange
-		}
-
-		sourceDay := sh.api.FetchDayByDate(*sourceDate)
-
-		var wg sync.WaitGroup
-		wg.Add(len(sourceDay.TrackedTimes))
-		for _, tt := range sourceDay.TrackedTimes {
-			go func(tt heimat.TrackEntry) {
-				sh.api.SendCreateTime(sh.api.UserID(), *targetDate, tt.Start, tt.End, tt.Note, tt.Task)
-				wg.Done()
-			}(tt)
-		}
-		wg.Wait()
-
-		day := sh.api.FetchDayByDate(*targetDate)
-		print.Day(day)
-
-		// TODO: fetch time from source date and crate on target date
-		return stateKeyNoChange
-	}
-
-	if strings.Contains(cmd, "logout") {
-		sh.api.Logout()
-		fmt.Printf("Good bye! 👋\n")
-		return stateKeyLogin
-	}
-
-	return stateKeyNoChange
+func (sh StateHome) logout(cmd string) *StateKey {
+	sh.api.Logout()
+	fmt.Printf("Good bye! 👋\n")
+	newKey := stateKeyLogin
+	return &newKey
 }
 
 // Init noop

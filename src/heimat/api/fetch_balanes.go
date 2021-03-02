@@ -9,8 +9,12 @@ import (
 
 // FetchBalances _
 func (api *API) FetchBalances(date time.Time) *heimat.Balances {
+	return api.FetchBalancesByUser(api.UserID(), date)
+}
+
+func (api *API) FetchBalancesByUser(userID int, date time.Time) *heimat.Balances {
 	year, _, _ := date.Date()
-	url := api.urlBalances(api.UserID(), year)
+	url := api.urlBalances(userID, year)
 
 	resp, _, err := api.httpGet(api.Token(), url, nil)
 	if err != nil {

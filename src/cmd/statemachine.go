@@ -18,7 +18,7 @@ type State interface {
 type StateKey string
 
 const (
-	stateKeyNoChange = ""
+	stateKeyNoChange StateKey = ""
 
 	stateKeyLogin   StateKey = "login"
 	stateKeyHome    StateKey = "home"
@@ -29,14 +29,12 @@ const (
 type StateMachine struct {
 	currentState State
 	states       map[StateKey]State
-	homeStateKey StateKey
 }
 
 // NewStateMachine _
 func NewStateMachine(homeStateKey StateKey) *StateMachine {
 	return &StateMachine{
-		states:       make(map[StateKey]State),
-		homeStateKey: homeStateKey,
+		states: make(map[StateKey]State),
 	}
 }
 
@@ -58,9 +56,4 @@ func (sm *StateMachine) ChangeState(key StateKey) {
 	}
 	sm.currentState = s
 	sm.currentState.Init()
-}
-
-// Cancel cancels the current state and returns to the home state
-func (sm *StateMachine) Cancel() {
-	sm.ChangeState(sm.homeStateKey)
 }
