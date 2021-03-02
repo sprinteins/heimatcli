@@ -115,7 +115,6 @@ func renderTime(te heimat.TrackEntry) string {
 func renderDuration(te heimat.TrackEntry) string {
 	dur := calcDuration(te.Start, te.End)
 	return fmt.Sprintf("%s", dur.String())
-
 }
 
 func calcDuration(s, e string) time.Duration {
