@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"heimatcli/src/heimat"
 	"heimatcli/src/x/log"
 	"net/url"
 	"time"
@@ -46,7 +47,7 @@ func (api API) urlProjects(userID int, date time.Time) string {
 	}
 
 	q := fullURL.Query()
-	q.Add("date", NewHeimatDate(date))
+	q.Add("date", heimat.NewHeimatDate(date))
 	fullURL.RawQuery = q.Encode()
 
 	return fullURL.String()

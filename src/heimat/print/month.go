@@ -3,7 +3,6 @@ package print
 import (
 	"fmt"
 	"heimatcli/src/heimat"
-	"heimatcli/src/heimat/api"
 	"heimatcli/src/heimat/calc"
 	"sort"
 	"time"
@@ -22,7 +21,7 @@ func Month(month *heimat.Month) {
 		{},
 	}
 
-	d := api.DateFromHeimatDate(month.TrackedTimesDate[0].Date)
+	d := heimat.ParseHeimatDate(month.TrackedTimesDate[0].Date)
 	yearMonth := d.Format("2006 01 (Jan)")
 	fmt.Printf("%s\n", yearMonth)
 	fmt.Printf("\n")
@@ -39,7 +38,7 @@ func Month(month *heimat.Month) {
 
 	for _, day := range month.TrackedTimesDate {
 
-		d = api.DateFromHeimatDate(day.Date)
+		d = heimat.ParseHeimatDate(day.Date)
 		dayDate := d.Format("02 (Mon)")
 
 		if len(day.TrackedTimes) == 0 {

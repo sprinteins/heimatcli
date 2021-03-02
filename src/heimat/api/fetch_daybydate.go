@@ -22,7 +22,7 @@ func (api *API) FetchDayByDate(date time.Time) *heimat.Day {
 	if days == nil {
 		return nil
 	}
-	day := findDayByDate(days.TrackedTimesDate, NewHeimatDate(date))
+	day := findDayByDate(days.TrackedTimesDate, heimat.NewHeimatDate(date))
 
 	return day
 
@@ -32,8 +32,8 @@ func (api *API) fetchDaysByDates(start, end time.Time) *heimat.Month {
 	url := api.urlDayByDate(api.UserID())
 
 	queries := []Query{
-		{key: "start", value: NewHeimatDate(start)},
-		{key: "end", value: NewHeimatDate(end)},
+		{key: "start", value: heimat.NewHeimatDate(start)},
+		{key: "end", value: heimat.NewHeimatDate(end)},
 	}
 
 	resp, _, err := api.httpGet(api.Token(), url, queries)
@@ -83,22 +83,4 @@ func firstLastOfMonth(date time.Time) (firstDay, lastDay time.Time) {
 
 type trackedTimeResponse struct {
 	TrackedTimesDate []heimat.Day `json:"trackedTimesDate"`
-}
-
-// HeimatDate _
-type HeimatDate = string
-
-// NewHeimatDate _
-func NewHeimatDate(date time.Time) HeimatDate {
-	return HeimatDate(date.Format("2006-01-02"))
-}
-
-// DateFromHeimatDate _
-func DateFromHeimatDate(heimatDate string) time.Time {
-	d, err := time.Parse("2006-01-02", heimatDate)
-	if err != nil {
-		log.Error.Printf("could not parse heimat date to date: %s", err)
-		return time.Time{}
-	}
-	return d
 }

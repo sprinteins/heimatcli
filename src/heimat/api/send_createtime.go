@@ -22,7 +22,7 @@ func (api *API) SendCreateTime(
 	apiURL := api.urlTrackedTimeCreate()
 
 	createTimePayload := createTrackedTimePayload{
-		Date:     NewHeimatDate(date),
+		Date:     heimat.NewHeimatDate(date),
 		Employee: employeeIDPayload{ID: userID},
 		TrackedTimes: []trackedTimePayload{
 			{
@@ -55,7 +55,7 @@ func (api *API) SendCreateTime(
 }
 
 type createTrackedTimePayload struct {
-	Date         HeimatDate           `json:"date"`
+	Date         heimat.HeimatDate    `json:"date"`
 	Employee     employeeIDPayload    `json:"employee"`
 	TrackedTimes []trackedTimePayload `json:"trackedTimes"`
 }
