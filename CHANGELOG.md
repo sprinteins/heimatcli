@@ -6,8 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2021-03-02
+
+### Added
+- Time Report Generation CLI Options for HR (`heimat -report=times`)
+
 ### Changed
 - Wording of Holidays to Vacation days in user profile (`profile`)
+
+### Fix
+- User could "escape" into home state without login
+
 
 ## [0.1.0] - 2021-02-31
 
