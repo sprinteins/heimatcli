@@ -5,23 +5,23 @@
 class Heimatcli < Formula
   desc ""
   homepage ""
-  version "0.1.1"
+  version "0.1.2"
   bottle :unneeded
 
   if OS.mac? && Hardware::CPU.intel?
-    url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.1/heimatcli_0.1.1_Darwin_x86_64.tar.gz"
-    sha256 "b9542c921388106784772884bd236094b1d3687dbf58a239295da33fdc4c8330"
+    url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.2/heimatcli_0.1.2_Darwin_x86_64.tar.gz"
+    sha256 "b176a118394137d9cd01b9a4cd3a7c3d07e6d75498d5665cb8f3b4c9a8b4b6c6"
   end
   if OS.linux? && Hardware::CPU.intel?
-    url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.1/heimatcli_0.1.1_Linux_x86_64.tar.gz"
-    sha256 "e641414a7671528b05d5b079a75cc9bf0fc33c553fc84d269390364cc623afc2"
+    url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.2/heimatcli_0.1.2_Linux_x86_64.tar.gz"
+    sha256 "0b13ea415856003897037d4de0b7bb1ff4fe6f3c3cf6059a49066bd7c5e55b5b"
   end
   if OS.linux? && Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-    url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.1/heimatcli_0.1.1_Linux_arm64.tar.gz"
-    sha256 "b51d0e32468ef963d222675d0ea33622e36c56ea5809b90e2cdcc6c2fd7a65f0"
+    url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.2/heimatcli_0.1.2_Linux_arm64.tar.gz"
+    sha256 "a54d95c101398da61877da578736e54a0e2ba477b8bc7fba2744b5fef23edd8b"
   end
 
   def install
-    bin.install "heimat"
+    bin.install "heimatcli"
   end
 end
