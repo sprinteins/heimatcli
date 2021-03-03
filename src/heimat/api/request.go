@@ -33,6 +33,16 @@ func (api *API) httpGet(
 	return api.httpRequest(http.MethodGet, authtoken, url, queries, emptyPayload)
 }
 
+func (api *API) httpDelete(
+	authtoken string,
+	url string,
+) (*http.Response, []*http.Cookie, error) {
+	emptyPayload := make([]byte, 0)
+	emptyQueries := make([]Query, 0)
+
+	return api.httpRequest(http.MethodDelete, authtoken, url, emptyQueries, emptyPayload)
+}
+
 //
 // USE THE PRECONFIGURED METHODS
 //

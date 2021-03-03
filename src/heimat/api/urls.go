@@ -73,3 +73,11 @@ func (api API) urlTrackedTimeCreate() string {
 func (api API) urlBalances(userID int, year int) string {
 	return fmt.Sprintf("%s/employees/%d/absence/balances/%d", api.baseURL.String(), userID, year)
 }
+
+func (api API) urlTrackedTimeDelete(timeID int) string {
+	apiURL := urlTrackedTime
+	baseURL := api.baseURL
+
+	fullURL := fmt.Sprintf("%s%s/%d", baseURL.String(), apiURL, timeID)
+	return fullURL
+}

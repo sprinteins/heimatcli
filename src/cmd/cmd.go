@@ -98,6 +98,7 @@ func startPrompt(heimatAPI *api.API) {
 	sm.AddState(stateKeyLogin, NewStateLogin(heimatAPI))
 	sm.AddState(stateKeyHome, NewStateHome(heimatAPI))
 	sm.AddState(stateKeyTimeAdd, NewStateTimeAdd(heimatAPI, cancel))
+	sm.AddState(stateKeyTimeDelete, NewStateTimeDelete(heimatAPI, cancel))
 
 	// Skip Login if already authenticated
 	if heimatAPI.IsAuthenticated() {

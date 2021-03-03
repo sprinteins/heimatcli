@@ -20,9 +20,10 @@ type StateKey string
 const (
 	stateKeyNoChange StateKey = ""
 
-	stateKeyLogin   StateKey = "login"
-	stateKeyHome    StateKey = "home"
-	stateKeyTimeAdd StateKey = "timeadd"
+	stateKeyLogin      StateKey = "login"
+	stateKeyHome       StateKey = "home"
+	stateKeyTimeAdd    StateKey = "timeadd"
+	stateKeyTimeDelete StateKey = "timedelete"
 )
 
 // StateMachine _

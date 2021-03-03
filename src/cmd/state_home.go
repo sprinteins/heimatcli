@@ -17,11 +17,23 @@ import (
 
 // StateHome _
 type StateHome struct {
-	api      *api.API
-	commands map[string]commandFn
+	api               *api.API
+	commands          []command
+	suggestions       []suggestion
+	defaultSuggestion []prompt.Suggest
 }
 
 type commandFn = func(cmd string) *StateKey
+type command struct {
+	key     string
+	command commandFn
+}
+
+type suggestFn = func() []prompt.Suggest
+type suggestion struct {
+	key     string
+	suggest suggestFn
+}
 
 // NewStateHome _
 func NewStateHome(api *api.API) *StateHome {
@@ -29,14 +41,53 @@ func NewStateHome(api *api.API) *StateHome {
 	sh := &StateHome{
 		api: api,
 	}
+	sh.commands = []command{
+		{key: "time show day", command: sh.showDay},
+		{key: "time show month", command: sh.showMonth},
+		{key: "time add", command: sh.changeToTimeAdd},
+		{key: "time delete", command: sh.changeToTimeDelete},
+		{key: "time copy", command: sh.copyTime},
+		{key: "profile", command: sh.showProfile},
+		{key: "logout", command: sh.logout},
+	}
 
-	sh.commands = map[string]commandFn{
-		"time show day":   sh.showDay,
-		"time show month": sh.showMonth,
-		"time add":        sh.changeToTimeAdd,
-		"time copy":       sh.copyTime,
-		"profile":         sh.showProfile,
-		"logout":          sh.logout,
+	noSuggestions := func() []prompt.Suggest { return []prompt.Suggest{} }
+	sh.suggestions = []suggestion{
+		{key: "time show day", suggest: noSuggestions},
+		{key: "time show month", suggest: noSuggestions},
+		{key: "time add", suggest: noSuggestions},
+		{key: "time delete", suggest: noSuggestions},
+		{key: "profile", suggest: noSuggestions},
+		{key: "logout", suggest: noSuggestions},
+		{key: "time copy", suggest: noSuggestions},
+
+		{
+			key: "time show",
+			suggest: func() []prompt.Suggest {
+				return []prompt.Suggest{
+					{Text: "day", Description: "Show Day"},
+					{Text: "month", Description: "Show Month"},
+				}
+			},
+		},
+
+		{
+			key: "time",
+			suggest: func() []prompt.Suggest {
+				return []prompt.Suggest{
+					{Text: "show", Description: "Show Tracked Time"},
+					{Text: "add", Description: "Add Time"},
+					{Text: "copy", Description: "Copy a day"},
+					{Text: "delete", Description: "Delete Tracked Times"},
+				}
+			},
+		},
+	}
+
+	sh.defaultSuggestion = []prompt.Suggest{
+		{Text: "time", Description: "Time Tracking"},
+		{Text: "profile", Description: "Show the profile and stats about the user"},
+		{Text: "logout", Description: "Logout"},
 	}
 
 	return sh
@@ -46,52 +97,15 @@ func NewStateHome(api *api.API) *StateHome {
 func (sh StateHome) Suggestions(in prompt.Document) []prompt.Suggest {
 
 	cmd := normalizeCommand(in.Text)
-	noSuggestions := []prompt.Suggest{}
 
-	if strings.Contains(cmd, "time show day") {
-		return noSuggestions
-	}
-
-	if strings.Contains(cmd, "time show month") {
-		return noSuggestions
-	}
-
-	if strings.Contains(cmd, "time add") {
-		return noSuggestions
-	}
-
-	if strings.Contains(cmd, "profile") {
-		return noSuggestions
-	}
-
-	if strings.Contains(cmd, "time copy") {
-		return noSuggestions
-	}
-
-	if strings.Contains(cmd, "time show") {
-		return []prompt.Suggest{
-			{Text: "day", Description: "Show Day"},
-			{Text: "month", Description: "Show Month"},
+	for _, suggestion := range sh.suggestions {
+		if strings.Contains(cmd, suggestion.key) {
+			return suggestion.suggest()
 		}
 	}
 
-	if strings.Contains(cmd, "time") {
-		return []prompt.Suggest{
-			{Text: "show", Description: "Show Tracked Time"},
-			{Text: "add", Description: "Add Time"},
-			{Text: "copy", Description: "Copy a day"},
-		}
-	}
+	return sh.defaultSuggestion
 
-	if strings.Contains(cmd, "logout") {
-		return noSuggestions
-	}
-
-	return []prompt.Suggest{
-		{Text: "time", Description: "Time Tracking"},
-		{Text: "profile", Description: "Show the profile and stats about the user"},
-		{Text: "logout", Description: "Logout"},
-	}
 }
 
 // Prefix _
@@ -105,9 +119,9 @@ func (sh StateHome) Exe(in string) StateKey {
 	cmd := normalizeCommand(in)
 	var newKey *StateKey
 
-	for key, command := range sh.commands {
-		if strings.Contains(cmd, key) {
-			newKey = command(cmd)
+	for _, command := range sh.commands {
+		if strings.Contains(cmd, command.key) {
+			newKey = command.command(cmd)
 			break
 		}
 	}
@@ -163,6 +177,13 @@ func (sh StateHome) changeToTimeAdd(cmd string) *StateKey {
 	date := dateFromCommand(cmd, "time add")
 	stateTimeAddSetTime <- date
 	newKey := stateKeyTimeAdd
+	return &newKey
+}
+
+func (sh StateHome) changeToTimeDelete(cmd string) *StateKey {
+	date := dateFromCommand(cmd, "time delete")
+	stateTimeDeleteSetTime <- date
+	newKey := stateKeyTimeDelete
 	return &newKey
 }
 
