@@ -8,7 +8,7 @@ import (
 
 // FetchEmployees _
 // https://heimat-demo.sprinteins.com/api/v1/employees/
-func (api *API) FetchEmployeeIDs() []heimat.User {
+func (api *API) FetchEmployees() []heimat.User {
 	apiURL := api.urlEmployeesAll()
 
 	resp, _, err := api.httpGet(api.Token(), apiURL, nil)
@@ -22,8 +22,9 @@ func (api *API) FetchEmployeeIDs() []heimat.User {
 	err = json.Unmarshal(respBytes, &empResp)
 	if err != nil {
 		log.Error.Printf(
-			"could not unmarshal users response: %s\n%s\n",
+			"could not unmarshal users response: err=%s\nurl=%s\nresp=%s\n",
 			err.Error(),
+			apiURL,
 			string(respBytes),
 		)
 

@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixe
+
+- Check Login Status for CLI Commands
+
+
 ## [0.1.1] - 2021-03-02
 
 ### Added

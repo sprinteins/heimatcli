@@ -50,6 +50,7 @@ func Run() {
 	heimatAPI := api.NewAPI("https://heimat.sprinteins.com/api/v1")
 
 	if report != nil && *report == "times" {
+		cliLogin(heimatAPI)
 		runTimeReport(heimatAPI)
 		return
 	}
@@ -58,7 +59,7 @@ func Run() {
 }
 
 func runTimeReport(api *api.API) {
-	emps := api.FetchEmployeeIDs()
+	emps := api.FetchEmployees()
 	timeReports := make([]print.TimeReport, len(emps))
 	var wg sync.WaitGroup
 	wg.Add(len(emps))
@@ -72,6 +73,11 @@ func runTimeReport(api *api.API) {
 	wg.Wait()
 
 	print.TimeReports(timeReports)
+}
+
+func cliLogin(api *api.API) {
+	loginState := NewStateLogin(api)
+	loginState.Exe("")
 }
 
 func startPrompt(heimatAPI *api.API) {

@@ -21,13 +21,18 @@ func (api *API) FetchBalancesByUser(userID int, date time.Time) *heimat.Balances
 		log.Error.Printf("Could not fetch projects: %s\n", err.Error())
 		return nil
 	}
+	respBodyBytes := readBody(resp)
 
 	if resp.StatusCode >= 300 {
-		log.Error.Printf("could not fetch project, HTTP Status: %d", resp.StatusCode)
+		log.Error.Printf(
+			"msg='could not fetch balances' http_status=%d url='%s' resp='%s'",
+			resp.StatusCode,
+			url,
+			string(respBodyBytes),
+		)
 		return nil
 	}
 
-	respBodyBytes := readBody(resp)
 	balances := &heimat.Balances{}
 	err = json.Unmarshal(respBodyBytes, balances)
 	if err != nil {
