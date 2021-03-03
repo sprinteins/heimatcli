@@ -36,5 +36,5 @@ changelog:
 brews:
   - tap:
       owner: sprinteins
-      name: heimat
+      name: heimatcli
   - description: "A CLI/REPL Client for Heimat"
