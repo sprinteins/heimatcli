@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.1.2] - 2021-03-03
+
 ### Added
 
 - Time Delete, works similar to Time Add (`time delete`)
@@ -13,7 +16,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Check Login Status for CLI Commands
-
 
 ## [0.1.1] - 2021-03-02
 
