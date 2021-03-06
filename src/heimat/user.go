@@ -43,6 +43,11 @@ type PSL struct {
 	LastName  string `json:"lastName"`
 }
 
+// Name returns the full name
+func (psl PSL) Name() string {
+	return psl.FirstName + " " + psl.LastName
+}
+
 // LeadRole _
 type LeadRole struct {
 	ID string `json:"id"`

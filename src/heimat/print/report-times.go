@@ -2,13 +2,12 @@ package print
 
 import (
 	"fmt"
+	"heimatcli/src/heimat"
 
 	"github.com/alexeyco/simpletable"
 )
 
 func TimeReports(trs []TimeReport) {
-
-	// HeimatDate(day.Date)
 
 	table := simpletable.New()
 
@@ -35,6 +34,7 @@ func TimeReports(trs []TimeReport) {
 }
 
 type TimeReport struct {
+	PSL          heimat.PSL
 	Name         string
 	TimeBalance  float32
 	VacationLeft float32

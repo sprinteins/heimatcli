@@ -2,9 +2,12 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"heimatcli/src/heimat"
 	"heimatcli/src/heimat/api"
 	"heimatcli/src/heimat/print"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -42,37 +45,94 @@ var sm *StateMachine
 // Run start the app
 func Run() {
 
+	const defaultAPI = "https://heimat.sprinteins.com/api/v1"
+
 	// parse flags
 	report := flag.String("report", "", "generate a report")
+	psl := flag.String("psl", "", "people success lead")
+	apiEndpoint := flag.String("api", defaultAPI, "API Endpoint")
 	flag.Parse()
 
 	// Initialize Dependencies
-	heimatAPI := api.NewAPI("https://heimat.sprinteins.com/api/v1")
+	heimatAPI := api.NewAPI(*apiEndpoint)
 
 	if report != nil && *report == "times" {
 		cliLogin(heimatAPI)
-		runTimeReport(heimatAPI)
+		runTimeReport(heimatAPI, *psl)
 		return
 	}
 	startPrompt(heimatAPI)
 
 }
 
-func runTimeReport(api *api.API) {
+func runTimeReport(api *api.API, psl string) {
 	emps := api.FetchEmployees()
+
+	// fetch balances
 	timeReports := make([]print.TimeReport, len(emps))
 	var wg sync.WaitGroup
 	wg.Add(len(emps))
 	for ei, emp := range emps {
-		go func(index int, emp heimat.User) {
+		go func(ei int, emp heimat.User) {
 			balances := api.FetchBalancesByUser(emp.ID, time.Now())
-			timeReports[index] = print.TimeReport{Name: emp.Name(), TimeBalance: balances.BalanceWorkingHours, VacationLeft: balances.HolidayEntitlement - balances.Holidays}
+			user := api.FetchUserByID(emp.ID)
+			timeReports[ei] = print.TimeReport{
+				PSL:          user.PSL,
+				Name:         emp.Name(),
+				TimeBalance:  balances.BalanceWorkingHours,
+				VacationLeft: balances.HolidayEntitlement - balances.Holidays,
+			}
 			wg.Done()
 		}(ei, emp)
 	}
 	wg.Wait()
 
-	print.TimeReports(timeReports)
+	// print Time Reports pro PSL
+	buckets := splitTimeReportToPSLBuckets(timeReports)
+
+	fmt.Println()
+	fmt.Printf("Times-Report generated at: %s\n", time.Now().Format("2006.01.02 15:04:05"))
+	fmt.Println()
+
+	// Sorting PSLs for a consistence report,
+	// because the order in ranging over map is always different
+	psls := make([]string, 0, len(buckets))
+	for keyPSL := range buckets {
+		psls = append(psls, keyPSL)
+	}
+	sort.Strings(psls)
+
+	// printing buckets
+	for _, keyPSL := range psls {
+		bucket := buckets[keyPSL]
+
+		if !strings.Contains(strings.ToLower(keyPSL), strings.ToLower(psl)) {
+			continue
+		}
+		fmt.Printf("PSL: %s\n\n", keyPSL)
+		print.TimeReports(bucket)
+		fmt.Printf("\n\n\n")
+	}
+
+}
+
+type pslBuckets = map[string][]print.TimeReport
+
+func splitTimeReportToPSLBuckets(trs []print.TimeReport) pslBuckets {
+	buckets := make(pslBuckets)
+
+	for _, tr := range trs {
+		psl := tr.PSL.Name()
+		_, ok := buckets[psl]
+		if !ok {
+			buckets[psl] = make([]print.TimeReport, 0)
+		}
+
+		bucket, _ := buckets[psl]
+		buckets[psl] = append(bucket, tr)
+	}
+
+	return buckets
 }
 
 func cliLogin(api *api.API) {
