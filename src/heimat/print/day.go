@@ -27,7 +27,22 @@ func Day(day *heimat.Day) {
 	}
 
 	var subTime time.Duration
-	for _, tt := range day.TrackedTimes {
+	for tti, tt := range day.TrackedTimes {
+
+		prevTime := prevTime(tti, day.TrackedTimes)
+		if prevTime != nil {
+			diffBetweenPrevAndCurrent := calc.Duration(prevTime.End, tt.Start)
+			if diffBetweenPrevAndCurrent > 0 {
+				r := []*simpletable.Cell{
+					{Align: simpletable.AlignRight, Text: prevTime.End},
+					{Align: simpletable.AlignRight, Text: tt.Start},
+					{Align: simpletable.AlignLeft, Text: diffBetweenPrevAndCurrent.String()},
+					{Align: simpletable.AlignLeft, Text: "--- BREAK ---", Span: 3},
+				}
+				table.Body.Cells = append(table.Body.Cells, r)
+			}
+		}
+
 		dur := calc.Duration(tt.Start, tt.End)
 		subTime = subTime + dur
 
@@ -56,4 +71,13 @@ func Day(day *heimat.Day) {
 
 	table.SetStyle(simpletable.StyleCompactLite)
 	fmt.Println(table.String())
+}
+
+func prevTime(timeIndex int, trackedTimes []heimat.TrackEntry) *heimat.TrackEntry {
+	prevIndex := timeIndex - 1
+	if prevIndex < 0 || prevIndex > len(trackedTimes)-1 {
+		return nil
+	}
+	trackedTime := trackedTimes[prevIndex]
+	return &trackedTime
 }

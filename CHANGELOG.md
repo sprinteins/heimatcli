@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Time Report accepts a PSL filter; the filter can be a substring of a name and it is case-insensitive
+- `time show day` shows breaks between tracked times 
+
+### Changed
+
+- Time Report groups by PSL
 
 ## [0.1.2] - 2021-03-03
 
@@ -39,3 +47,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Time report of a day with default, relative and absolute date (`time show day`)
 - Time report of the current month (`time show month`)
 - Time copy of given day to another with default, relative and absolute date (`time copy`)
+
