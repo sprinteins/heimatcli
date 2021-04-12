@@ -84,9 +84,8 @@ func (std StateTimeDelete) Exe(in string) StateKey {
 		std.api.DeleteTime(id)
 	}
 
-	day := std.api.FetchDayByDate(std.date)
-
-	print.Day(day)
+	std.day = std.api.FetchDayByDate(std.date)
+	print.Day(std.day)
 
 	return stateKeyNoChange
 }
