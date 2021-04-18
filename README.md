@@ -41,17 +41,45 @@ E.g.: `time show day 4`
 
 ## Commands
 
-- `time show day [+/-]X`: Shows the tracked times of a given date  
-  For Example:
-  - `time show day`: shows today's tracked times
-  - `time show day +1`: shows tomorrow's tracked times
-  - `time show day -1`: shows yesterday's tracked times
-  - `time show day 4` shows the 4th day of the current month's tracked times
-- `time add [+/-x]`: Go into the time-add mode on the given date. You can recognize if you are on a different date than today on the command prefix. It will show the absolute date.  
+### `time show day`
+
+Shows the tracked times of a given date  
+
+For Example:
+- `time show day`: shows today's tracked times
+- `time show day +1`: shows tomorrow's tracked times
+- `time show day -1`: shows yesterday's tracked times
+- `time show day 4` shows the 4th day of the current month's tracked times
+
+### `time add`
+
+Go into the time-add mode on the given date. You can recognize if you are on a different date than today on the command prefix. It will show the absolute date.  
     For example: `heimat > time add 4` => `heimat > time add (04.12) > `
-- `time copy [+/-]X [[+/-]Y]`: this command accepts two arguments.  
-    The first one (`X`) is the source date; it will copy from this date the tracked times.   
-    The second (`Y`) is the target; it will copy from this date tracked times. It is optional and falls back to today.  
-    For example: `heimat > time copy -1 +1`: copy the tracked times from yesterday to tomorrow.
-- `time show month`: shows the tracked times of the current month
-- `profile`: show the profile and statistics about the logged in user
+
+### `time copy`
+
+`time copy [+/-]X [[+/-]Y]`: this command accepts two arguments.  
+The first one (`X`) is the source date; it will copy from this date the tracked times.   
+The second (`Y`) is the target; it will copy from this date tracked times. It is optional and falls back to today.  
+For example: `heimat > time copy -1 +1`: copy the tracked times from yesterday to tomorrow.
+
+### `time show month`
+
+Show the tracked times of the current month
+
+### `profile`
+
+Show the profile and statistics about the logged in user
+
+### `stats`
+
+Gather time spent on different categories:
+- `stats project` gathers time spent per project
+- `stats task` gathers time spent per task
+- `stats desc` gathers time spent per description  
+    
+Furthermore, you can set the month range relatively and absolutely in the current year
+- `stats task 1` shows the stats from January of the current year
+- `stats task -1` shows the stats from the previous month
+- `stats task 1 3` shows the stats from January to March
+  - `stats task 1 0` shows the stats from January to the current month 

@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- `stats` command gathers time spent on different categories: projects, tasks and desc  
+  > See more: [Stats](./README.md#stats)
+
+
+## [0.1.3] - 2021-03-09
+
 ### Added
 
 - Time Report accepts a PSL filter; the filter can be a substring of a name and it is case-insensitive
