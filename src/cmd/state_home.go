@@ -5,9 +5,9 @@ import (
 	"heimatcli/src/heimat"
 	"heimatcli/src/heimat/api"
 	"heimatcli/src/heimat/print"
+	"heimatcli/src/x/date"
 	"heimatcli/src/x/log"
 	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -29,7 +29,7 @@ type command struct {
 	command commandFn
 }
 
-type suggestFn = func() []prompt.Suggest
+type suggestFn = func(cmd string) []prompt.Suggest
 type suggestion struct {
 	key     string
 	suggest suggestFn
@@ -37,6 +37,8 @@ type suggestion struct {
 
 // NewStateHome _
 func NewStateHome(api *api.API) *StateHome {
+
+	ctrlStats := NewCtrlStats(api)
 
 	sh := &StateHome{
 		api: api,
@@ -48,10 +50,12 @@ func NewStateHome(api *api.API) *StateHome {
 		{key: "time delete", command: sh.changeToTimeDelete},
 		{key: "time copy", command: sh.copyTime},
 		{key: "profile", command: sh.showProfile},
+		{key: "stats", command: ctrlStats.ShowStats},
+
 		{key: "logout", command: sh.logout},
 	}
 
-	noSuggestions := func() []prompt.Suggest { return []prompt.Suggest{} }
+	noSuggestions := func(_ string) []prompt.Suggest { return []prompt.Suggest{} }
 	sh.suggestions = []suggestion{
 		{key: "time show day", suggest: noSuggestions},
 		{key: "time show month", suggest: noSuggestions},
@@ -63,7 +67,7 @@ func NewStateHome(api *api.API) *StateHome {
 
 		{
 			key: "time show",
-			suggest: func() []prompt.Suggest {
+			suggest: func(_ string) []prompt.Suggest {
 				return []prompt.Suggest{
 					{Text: "day", Description: "Show Day"},
 					{Text: "month", Description: "Show Month"},
@@ -73,7 +77,7 @@ func NewStateHome(api *api.API) *StateHome {
 
 		{
 			key: "time",
-			suggest: func() []prompt.Suggest {
+			suggest: func(_ string) []prompt.Suggest {
 				return []prompt.Suggest{
 					{Text: "show", Description: "Show Tracked Time"},
 					{Text: "add", Description: "Add Time"},
@@ -82,12 +86,17 @@ func NewStateHome(api *api.API) *StateHome {
 				}
 			},
 		},
+		{
+			key:     "stats",
+			suggest: ctrlStats.Suggestions,
+		},
 	}
 
 	sh.defaultSuggestion = []prompt.Suggest{
 		{Text: "time", Description: "Time Tracking"},
 		{Text: "profile", Description: "Show the profile and stats about the user"},
 		{Text: "logout", Description: "Logout"},
+		{Text: "stats", Description: "Show statistics"},
 	}
 
 	return sh
@@ -100,7 +109,7 @@ func (sh StateHome) Suggestions(in prompt.Document) []prompt.Suggest {
 
 	for _, suggestion := range sh.suggestions {
 		if strings.Contains(cmd, suggestion.key) {
-			return suggestion.suggest()
+			return suggestion.suggest(cmd)
 		}
 	}
 
@@ -134,7 +143,7 @@ func (sh StateHome) Exe(in string) StateKey {
 }
 
 func (sh StateHome) showDay(cmd string) *StateKey {
-	date := dateFromCommand(cmd, "time show day")
+	date := date.DateFromCommand(cmd, "time show day")
 	day := sh.api.FetchDayByDate(date)
 	if day == nil {
 		return nil
@@ -174,14 +183,14 @@ func (sh StateHome) showProfile(cmd string) *StateKey {
 }
 
 func (sh StateHome) changeToTimeAdd(cmd string) *StateKey {
-	date := dateFromCommand(cmd, "time add")
+	date := date.DateFromCommand(cmd, "time add")
 	stateTimeAddSetTime <- date
 	newKey := stateKeyTimeAdd
 	return &newKey
 }
 
 func (sh StateHome) changeToTimeDelete(cmd string) *StateKey {
-	date := dateFromCommand(cmd, "time delete")
+	date := date.DateFromCommand(cmd, "time delete")
 	stateTimeDeleteSetTime <- date
 	newKey := stateKeyTimeDelete
 	return &newKey
@@ -236,53 +245,6 @@ func normalizeCommand(cmd string) string {
 //
 // TIME ADD
 //
-func dateFromCommand(cmd string, strToRemove string) time.Time {
-	rest := strings.Replace(cmd, strToRemove, "", 1)
-	rest = strings.TrimSpace(rest)
-	if rest == "" {
-		return time.Now()
-	}
-
-	return calcDateFromString(rest)
-}
-
-func isRelativeDate(d string) bool {
-	relativeDate := regexp.MustCompile(`^(\+|-)\d*$`)
-	return relativeDate.Match([]byte(d))
-}
-
-func calcDateFromString(dateStr string) time.Time {
-
-	if isRelativeDate(dateStr) || dateStr == "0" {
-		return calcRelativeDate(dateStr)
-	}
-	return calcAbsoluteDate(dateStr)
-
-}
-
-func calcRelativeDate(relativeDate string) time.Time {
-	diff, err := strconv.Atoi(relativeDate)
-	if err != nil {
-		log.Error.Printf("could not parse relative date: %s\n", err)
-		return time.Now()
-	}
-	return time.Now().AddDate(0, 0, diff)
-}
-
-func calcAbsoluteDate(absDate string) time.Time {
-	day, err := strconv.Atoi(absDate)
-	if err != nil {
-		log.Error.Printf("could not parse into day: %s\n", err)
-	}
-	now := time.Now()
-	year, month, _ := now.Date()
-	dateStr := fmt.Sprintf("%d-%d-%d", year, month, day)
-	newDate, err := time.Parse("2006-1-2", dateStr)
-	if err != nil {
-		log.Error.Printf("could not create new date from absolute date:%s", err)
-	}
-	return newDate
-}
 
 //
 // TIME COPY
@@ -298,14 +260,14 @@ func sourceAndTargetDateFromCMD(cmd string, baseCMD string) (source, target *tim
 	dates := dayDates.FindAll([]byte(rest), 2)
 
 	if len(dates) == 1 {
-		s := calcDateFromString(string(dates[0]))
+		s := date.CalcDateFromString(string(dates[0]))
 		t := time.Now()
 		return &s, &t
 	}
 
 	if len(dates) == 2 {
-		s := calcDateFromString(string(dates[0]))
-		t := calcDateFromString(string(dates[1]))
+		s := date.CalcDateFromString(string(dates[0]))
+		t := date.CalcDateFromString(string(dates[1]))
 		return &s, &t
 	}
 

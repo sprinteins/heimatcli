@@ -3,22 +3,23 @@ package api
 import (
 	"encoding/json"
 	"heimatcli/src/heimat"
+	"heimatcli/src/x/date"
 	"heimatcli/src/x/log"
 	"time"
 )
 
 // FetchMonthByDate _
-func (api *API) FetchMonthByDate(date time.Time) *heimat.Month {
-	start, end := firstLastOfMonth(date)
+func (api *API) FetchMonthByDate(d time.Time) *heimat.Month {
+	start, end := date.FirstLastOfMonth(d)
 
-	return api.fetchDaysByDates(start, end)
+	return api.FetchDaysByDates(start, end)
 }
 
 // FetchDayByDate _
 // https://heimat-demo.sprinteins.com/api/v1/employees/42/trackedtimes?start=2020-01-01&end=2020-01-31
 func (api *API) FetchDayByDate(date time.Time) *heimat.Day {
 
-	days := api.fetchDaysByDates(date, date)
+	days := api.FetchDaysByDates(date, date)
 	if days == nil {
 		return nil
 	}
@@ -28,7 +29,7 @@ func (api *API) FetchDayByDate(date time.Time) *heimat.Day {
 
 }
 
-func (api *API) fetchDaysByDates(start, end time.Time) *heimat.Month {
+func (api *API) FetchDaysByDates(start, end time.Time) *heimat.Month {
 	url := api.urlDayByDate(api.UserID())
 
 	queries := []Query{
@@ -68,17 +69,6 @@ func findDayByDate(days []heimat.Day, date string) *heimat.Day {
 
 	return nil
 
-}
-
-func firstLastOfMonth(date time.Time) (firstDay, lastDay time.Time) {
-	now := date
-	currentYear, currentMonth, _ := now.Date()
-	currentLocation := now.Location()
-
-	firstDay = time.Date(currentYear, currentMonth, 1, 0, 0, 0, 0, currentLocation)
-	lastDay = firstDay.AddDate(0, 1, -1)
-
-	return firstDay, lastDay
 }
 
 type trackedTimeResponse struct {
