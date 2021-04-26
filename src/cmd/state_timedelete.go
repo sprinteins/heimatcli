@@ -56,7 +56,7 @@ func (std StateTimeDelete) Prefix() string {
 		return "heimat > time delete > "
 	}
 
-	monthDay := std.date.Format("01.02")
+	monthDay := std.date.Format("01-02")
 	return fmt.Sprintf("Heimat > time delete (%s) > ", monthDay)
 }
 

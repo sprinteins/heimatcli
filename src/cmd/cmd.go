@@ -91,7 +91,7 @@ func runTimeReport(api *api.API, psl string) {
 	buckets := splitTimeReportToPSLBuckets(timeReports)
 
 	fmt.Println()
-	fmt.Printf("Times-Report generated at: %s\n", time.Now().Format("2006.01.02 15:04:05"))
+	fmt.Printf("Times-Report generated at: %s\n", time.Now().Format("2006-01-02 15:04:05"))
 	fmt.Println()
 
 	// Sorting PSLs for a consistence report,

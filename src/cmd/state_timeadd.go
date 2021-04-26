@@ -79,7 +79,7 @@ func (sta StateTimeAdd) Prefix() string {
 		return "heimat > time add > "
 	}
 
-	monthDay := sta.date.Format("01.02")
+	monthDay := sta.date.Format("01-02")
 	return fmt.Sprintf("Heimat > time add (%s) > ", monthDay)
 }
 

@@ -6,9 +6,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.1.4] - 2021-04-26
+
+### Added
+
 - `stats` command gathers time spent on different categories: projects, tasks and desc  
   > See more: [Stats](./README.md#stats)
 
+### Changed
+
+- all displayed time formats now adhere to the ISO format
 
 ## [0.1.3] - 2021-03-09
 
