@@ -51,7 +51,14 @@ func Run() {
 	report := flag.String("report", "", "generate a report")
 	psl := flag.String("psl", "", "people success lead")
 	apiEndpoint := flag.String("api", defaultAPI, "API Endpoint")
+	versionRequest := flag.Bool("version", false, "Prints current version")
+
 	flag.Parse()
+
+	if *versionRequest {
+		fmt.Println("v0.1.4")
+		return
+	}
 
 	// Initialize Dependencies
 	heimatAPI := api.NewAPI(*apiEndpoint)
