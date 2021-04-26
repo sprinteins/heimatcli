@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `stats` command gathers time spent on different categories: projects, tasks and desc  
   > See more: [Stats](./README.md#stats)
+- `version` (CLI) version flag to get the installed version
 
 ### Changed
 
