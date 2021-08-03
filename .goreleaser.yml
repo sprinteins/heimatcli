@@ -12,10 +12,17 @@ builds:
     binary: heimat
     env:
       - CGO_ENABLED=0
+    # https://golang.org/doc/install/source#environment
     goos:
       - linux
       - windows
       - darwin
+    # https://golang.org/doc/install/source#environment
+    goarch:
+      - amd64
+      - arm
+      - arm64
+
 archives:
   - replacements:
       darwin: Darwin
