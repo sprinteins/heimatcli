@@ -5,20 +5,33 @@
 class Heimatcli < Formula
   desc ""
   homepage ""
-  version "0.1.4"
+  version "0.1.5"
   bottle :unneeded
 
-  if OS.mac? && Hardware::CPU.intel?
-    url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.4/heimatcli_0.1.4_Darwin_x86_64.tar.gz"
-    sha256 "cfb876b7e64018639abe1f604f2b83e81c2d4d8b5d5e4b0974129bf39edaf656"
+  on_macos do
+    if Hardware::CPU.intel?
+      url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.5/heimatcli_0.1.5_Darwin_x86_64.tar.gz"
+      sha256 "b45f034268bc2f2e35a80cba10a3a874c92ba980fcd02d47067cb8127120a451"
+    end
+    if Hardware::CPU.arm?
+      url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.5/heimatcli_0.1.5_Darwin_arm64.tar.gz"
+      sha256 "c80bdcb217d82b52e450accf429b4b5cb545bae5f58e6af319fc41e08430d95f"
+    end
   end
-  if OS.linux? && Hardware::CPU.intel?
-    url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.4/heimatcli_0.1.4_Linux_x86_64.tar.gz"
-    sha256 "354af13e3f2ba6ffb16fb1a68743f0e0900259aa9a30684ce8d537494d0a4889"
-  end
-  if OS.linux? && Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-    url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.4/heimatcli_0.1.4_Linux_arm64.tar.gz"
-    sha256 "7325b4660232449dd3c7b2c62ec45ef610a048b8fee0e354093596cb70c57f7d"
+
+  on_linux do
+    if Hardware::CPU.intel?
+      url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.5/heimatcli_0.1.5_Linux_x86_64.tar.gz"
+      sha256 "aa21d6999c186e6a32139c62966e0bd251d3bd96780be120279a9741c3d2db06"
+    end
+    if Hardware::CPU.arm? && !Hardware::CPU.is_64_bit?
+      url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.5/heimatcli_0.1.5_Linux_armv6.tar.gz"
+      sha256 "35c68423c853cf5520faf3058b3b52270a246c3c72f018a31ae6137634533d9f"
+    end
+    if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+      url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.5/heimatcli_0.1.5_Linux_arm64.tar.gz"
+      sha256 "fdf0ce7219d9fb317786f5a5b616c000c412e899d79a3f59cdc52d64a2433b67"
+    end
   end
 
   def install
