@@ -39,8 +39,18 @@ func (sl StateLogin) Prefix() string {
 // Exe _
 func (sl StateLogin) Exe(in string) StateKey {
 
+	ok := sl.Login()
+	if !ok {
+		return stateKeyNoChange
+	}
+
+	return stateKeyHome
+
+}
+
+func (sl StateLogin) Login() bool {
 	if sl.api.IsAuthenticated() {
-		return stateKeyHome
+		return true
 	}
 
 	reader := bufio.NewReader(os.Stdin)
@@ -48,25 +58,27 @@ func (sl StateLogin) Exe(in string) StateKey {
 	username, err := reader.ReadString('\n')
 	if err != nil {
 		log.Error.Println(err)
-		return stateKeyNoChange
+		return false
 	}
 
 	fmt.Print("Password: ")
 	password, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 	if err != nil {
 		log.Error.Println(err)
-		return stateKeyNoChange
+		return false
 	}
 	fmt.Println()
 
-	token := sl.api.Login(
+	token, err := sl.api.Login(
 		strings.TrimSpace(username),
 		strings.TrimSpace(string(password)),
 	)
+	if err != nil {
+		return false
+	}
 	sl.api.SetToken(token)
 
-	return stateKeyHome
-
+	return true
 }
 
 // Init noop

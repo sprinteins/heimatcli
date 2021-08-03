@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Login is more user friendly. Errors not printed directly.
+
+### Removed
+- PSL Report: it is now in the Heimat Web UI
 
 ## [0.1.4] - 2021-04-26
 

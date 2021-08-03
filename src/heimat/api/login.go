@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"heimatcli/src/x/log"
 	"heimatcli/src/x/types"
 	"io/ioutil"
@@ -17,7 +18,7 @@ type loginResponse struct {
 }
 
 // Login _
-func (api API) Login(username, password string) types.Token {
+func (api API) Login(username, password string) (types.Token, error) {
 
 	payload := loginPayload{
 		Username: username,
@@ -39,7 +40,7 @@ func (api API) Login(username, password string) types.Token {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode >= 300 {
-		log.Warning.Printf(
+		return "", fmt.Errorf(
 			"msg=non-success-response url=%s code=%d body=%s resp=%+v",
 			postURL,
 			resp.StatusCode,
@@ -54,7 +55,7 @@ func (api API) Login(username, password string) types.Token {
 		log.Error.Printf("could not unmarshal login response: %s", err)
 	}
 
-	return loginResp.Token
+	return loginResp.Token, nil
 
 }
 
@@ -70,7 +71,7 @@ func (api *API) IsAuthenticated() bool {
 func (api *API) isTokenValid() bool {
 
 	userID := api.UserID()
-	user := api.FetchUserByID(userID)
+	user, _ := api.fetchUserByID(userID)
 
 	return user != nil
 }
