@@ -39,11 +39,8 @@ var sm *StateMachine
 // Run start the app
 func Run() {
 
-	var clientId string
-	var apiEndpoint string
-
 	// parse flags
-	demo := flag.Bool("demo", false, "Run on Heimat Demo")
+	isDemo := flag.Bool("demo", false, "Run on Heimat Demo server")
 	versionRequest := flag.Bool("version", false, "Prints current version")
 
 	flag.Parse()
@@ -54,7 +51,7 @@ func Run() {
 	}
 
 	// Initialize Dependencies
-	setAppConfig(*demo, &clientId, &apiEndpoint)
+	apiEndpoint, clientId := getAppConfig(*isDemo)
 	heimatAPI := api.NewAPI(apiEndpoint, clientId)
 
 	startPrompt(heimatAPI)
@@ -112,15 +109,16 @@ func startPrompt(heimatAPI *api.API) {
 	p.Run()
 }
 
-func setAppConfig(isDemo bool, clientId *string, api *string) {
+func getAppConfig(isDemo bool) (api string, clientId string) {
 	if isDemo {
-		// Values for staging app
-		*clientId = "f5f0555a-4f0e-409b-93ba-a5a3c661a2fa"
-		*api = "https://heimat-demo.sprinteins.com/api/v1"
-		return
+		// Config for demo/staging app
+		api = "https://heimat-demo.sprinteins.com/api/v1"
+		clientId = "f5f0555a-4f0e-409b-93ba-a5a3c661a2fa"
+		return api, clientId
 	}
 
-	// Values for production
-	*clientId = "b3549fac-7bec-4ca8-acdb-91c4b6d94f62"
-	*api = "https://heimat.sprinteins.com/api/v1"
+	// Config for production
+	api = "https://heimat.sprinteins.com/api/v1"
+	clientId = "b3549fac-7bec-4ca8-acdb-91c4b6d94f62"
+	return api, clientId
 }
