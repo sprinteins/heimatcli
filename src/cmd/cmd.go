@@ -53,17 +53,8 @@ func Run() {
 		return
 	}
 
-	if *demo {
-		// Values for staging app
-		clientId = "f5f0555a-4f0e-409b-93ba-a5a3c661a2fa"
-		apiEndpoint = "https://heimat-demo.sprinteins.com/api/v1"
-	} else {
-		// Values for production
-		clientId = "b3549fac-7bec-4ca8-acdb-91c4b6d94f62"
-		apiEndpoint = "https://heimat.sprinteins.com/api/v1"
-	}
-
 	// Initialize Dependencies
+	setAppConfig(*demo, &clientId, &apiEndpoint)
 	heimatAPI := api.NewAPI(apiEndpoint, clientId)
 
 	startPrompt(heimatAPI)
@@ -119,4 +110,17 @@ func startPrompt(heimatAPI *api.API) {
 		}),
 	)
 	p.Run()
+}
+
+func setAppConfig(isDemo bool, clientId *string, api *string) {
+	if isDemo {
+		// Values for staging app
+		*clientId = "f5f0555a-4f0e-409b-93ba-a5a3c661a2fa"
+		*api = "https://heimat-demo.sprinteins.com/api/v1"
+		return
+	}
+
+	// Values for production
+	*clientId = "b3549fac-7bec-4ca8-acdb-91c4b6d94f62"
+	*api = "https://heimat.sprinteins.com/api/v1"
 }
