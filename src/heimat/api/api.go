@@ -7,12 +7,13 @@ import (
 
 // API _
 type API struct {
-	baseURL url.URL
-	token   string
+	baseURL  url.URL
+	clientId string
+	token    string
 }
 
 // NewAPI _
-func NewAPI(baseURL string) *API {
+func NewAPI(baseURL string, clntId string) *API {
 
 	base, err := url.Parse(baseURL)
 	if err != nil {
@@ -21,7 +22,8 @@ func NewAPI(baseURL string) *API {
 	}
 
 	heimatAPI := &API{
-		baseURL: *base,
+		baseURL:  *base,
+		clientId: clntId,
 	}
 	heimatAPI.loadToken()
 
@@ -49,4 +51,9 @@ func (api *API) UserID() int {
 	userID := ExtractEmployeeID(api.token)
 
 	return userID
+}
+
+// Client ID
+func (api *API) ClientId() string {
+	return api.clientId
 }

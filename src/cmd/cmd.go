@@ -39,21 +39,32 @@ var sm *StateMachine
 // Run start the app
 func Run() {
 
-	const defaultAPI = "https://heimat.sprinteins.com/api/v1"
+	var clientId string
+	var apiEndpoint string
 
 	// parse flags
-	apiEndpoint := flag.String("api", defaultAPI, "API Endpoint")
+	demo := flag.Bool("demo", false, "Run on Heimat Demo")
 	versionRequest := flag.Bool("version", false, "Prints current version")
 
 	flag.Parse()
 
 	if *versionRequest {
-		fmt.Println("v0.1.5")
+		fmt.Println("v0.2.0")
 		return
 	}
 
+	if *demo {
+		// Values for staging app
+		clientId = "f5f0555a-4f0e-409b-93ba-a5a3c661a2fa"
+		apiEndpoint = "https://heimat-demo.sprinteins.com/api/v1"
+	} else {
+		// Values for production
+		clientId = "b3549fac-7bec-4ca8-acdb-91c4b6d94f62"
+		apiEndpoint = "https://heimat.sprinteins.com/api/v1"
+	}
+
 	// Initialize Dependencies
-	heimatAPI := api.NewAPI(*apiEndpoint)
+	heimatAPI := api.NewAPI(apiEndpoint, clientId)
 
 	startPrompt(heimatAPI)
 
