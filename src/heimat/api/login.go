@@ -8,9 +8,8 @@ import (
 	"io/ioutil"
 )
 
-type loginPayload struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+type oidcLoginPayload struct {
+	Token string `json:"token"`
 }
 
 type loginResponse struct {
@@ -18,11 +17,10 @@ type loginResponse struct {
 }
 
 // Login _
-func (api API) Login(username, password string) (types.Token, error) {
+func (api API) Login(oidcToken string) (types.Token, error) {
 
-	payload := loginPayload{
-		Username: username,
-		Password: password,
+	payload := oidcLoginPayload{
+		Token: oidcToken,
 	}
 
 	p, err := json.Marshal(payload)
@@ -30,8 +28,9 @@ func (api API) Login(username, password string) (types.Token, error) {
 		log.Error.Printf("could not marshal login payload: %s", err)
 	}
 
-	postURL := api.urlAuthentication()
+	postURL := api.urlOpenId()
 	resp, _, err := api.httpPost("", postURL, nil, p)
+
 	if err != nil {
 		log.Error.Printf("could not make login request: %s", err)
 	}
