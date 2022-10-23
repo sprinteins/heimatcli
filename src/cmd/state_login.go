@@ -1,15 +1,13 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
+	"context"
 	"heimatcli/src/heimat/api"
 	"heimatcli/src/x/log"
-	"os"
 	"strings"
 
+	"github.com/AzureAD/microsoft-authentication-library-for-go/apps/public"
 	prompt "github.com/c-bata/go-prompt"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 // StateLogin _
@@ -53,27 +51,25 @@ func (sl StateLogin) Login() bool {
 		return true
 	}
 
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Username: ")
-	username, err := reader.ReadString('\n')
-	if err != nil {
-		log.Error.Println(err)
-		return false
+	azureAdAuthority := "https://login.microsoftonline.com/331e8350-a57c-43c3-9a37-d76cf8000f52"
+	publClientApp, publClientAppErr := public.New(sl.api.ClientId(), public.WithAuthority(azureAdAuthority))
+
+	if publClientAppErr != nil {
+		panic(publClientAppErr)
 	}
 
-	fmt.Print("Password: ")
-	password, err := terminal.ReadPassword(int(os.Stdin.Fd()))
-	if err != nil {
-		log.Error.Println(err)
-		return false
-	}
-	fmt.Println()
+	authResult, authErr := publClientApp.AcquireTokenInteractive(context.TODO(), nil)
 
-	token, err := sl.api.Login(
-		strings.TrimSpace(username),
-		strings.TrimSpace(string(password)),
+	if authErr != nil {
+		log.Error.Fatalf("An error occurred during OIDC authorization: %s", authErr)
+	}
+
+	token, tokenErr := sl.api.Login(
+		strings.TrimSpace(authResult.IDToken.RawToken),
 	)
-	if err != nil {
+
+	if tokenErr != nil {
+		log.Warning.Fatalf("An error occurred during Exchange of tokens: %s", authErr)
 		return false
 	}
 	sl.api.SetToken(token)

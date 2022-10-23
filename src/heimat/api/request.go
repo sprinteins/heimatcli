@@ -75,7 +75,7 @@ func (api *API) httpRequest(
 	}
 
 	// Set Headers
-	req.Header.Set("Host", "heimat.sprinteins.com")
+	req.Header.Set("Host", api.baseURL.Host)
 	req.Header.Set("authorization", "Bearer "+authtoken)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Client", "Heimat CLI (hicli)")

@@ -9,14 +9,23 @@ import (
 )
 
 const (
-	urlAuthentication = "/authentication"
-	urlEmployees      = "/employees"
-	urlTrackedTime    = "/trackedtimes"
+	urlAuthentication     = "/authentication"
+	urlOidcAuthentication = "/authentication/oidc"
+	urlEmployees          = "/employees"
+	urlTrackedTime        = "/trackedtimes"
 )
 
 func (api API) urlAuthentication() string {
 
 	apiURL := urlAuthentication
+
+	fullURL := fmt.Sprintf("%s%s", api.baseURL.String(), apiURL)
+	return fullURL
+}
+
+func (api API) urlOpenId() string {
+
+	apiURL := urlOidcAuthentication
 
 	fullURL := fmt.Sprintf("%s%s", api.baseURL.String(), apiURL)
 	return fullURL
