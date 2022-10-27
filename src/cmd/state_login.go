@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"heimatcli/src/heimat/api"
 	"heimatcli/src/x/log"
 	"strings"
@@ -51,6 +52,8 @@ func (sl StateLogin) Login() bool {
 		return true
 	}
 
+	fmt.Println("No session found. Opening browser to login.")
+
 	azureAdAuthority := "https://login.microsoftonline.com/331e8350-a57c-43c3-9a37-d76cf8000f52"
 	publClientApp, publClientAppErr := public.New(sl.api.ClientId(), public.WithAuthority(azureAdAuthority))
 
@@ -73,6 +76,8 @@ func (sl StateLogin) Login() bool {
 		return false
 	}
 	sl.api.SetToken(token)
+
+	fmt.Println("Login was successful.")
 
 	return true
 }
