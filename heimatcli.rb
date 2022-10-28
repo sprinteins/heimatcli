@@ -5,36 +5,51 @@
 class Heimatcli < Formula
   desc ""
   homepage ""
-  version "0.1.5"
-  bottle :unneeded
+  version "0.2.0"
 
   on_macos do
-    if Hardware::CPU.intel?
-      url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.5/heimatcli_0.1.5_Darwin_x86_64.tar.gz"
-      sha256 "b45f034268bc2f2e35a80cba10a3a874c92ba980fcd02d47067cb8127120a451"
-    end
     if Hardware::CPU.arm?
-      url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.5/heimatcli_0.1.5_Darwin_arm64.tar.gz"
-      sha256 "c80bdcb217d82b52e450accf429b4b5cb545bae5f58e6af319fc41e08430d95f"
+      url "https://github.com/sprinteins/heimatcli/releases/download/v0.2.0/heimatcli_0.2.0_Darwin_arm64.tar.gz"
+      sha256 "4b4b87921673e20492de467873c8a25505502a93a15034774e5e4713005f6388"
+
+      def install
+        bin.install "heimat"
+      end
+    end
+    if Hardware::CPU.intel?
+      url "https://github.com/sprinteins/heimatcli/releases/download/v0.2.0/heimatcli_0.2.0_Darwin_x86_64.tar.gz"
+      sha256 "a5c47cdb76eb89afaf41d2bbed48b0c57c467a580ed10e510e0a8c18fde3bee0"
+
+      def install
+        bin.install "heimat"
+      end
     end
   end
 
   on_linux do
-    if Hardware::CPU.intel?
-      url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.5/heimatcli_0.1.5_Linux_x86_64.tar.gz"
-      sha256 "aa21d6999c186e6a32139c62966e0bd251d3bd96780be120279a9741c3d2db06"
-    end
     if Hardware::CPU.arm? && !Hardware::CPU.is_64_bit?
-      url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.5/heimatcli_0.1.5_Linux_armv6.tar.gz"
-      sha256 "35c68423c853cf5520faf3058b3b52270a246c3c72f018a31ae6137634533d9f"
+      url "https://github.com/sprinteins/heimatcli/releases/download/v0.2.0/heimatcli_0.2.0_Linux_armv6.tar.gz"
+      sha256 "3ec80774eb5709d15944e7d5b149bc02f7ff58857bb5198406dcb7b0334a81be"
+
+      def install
+        bin.install "heimat"
+      end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/sprinteins/heimatcli/releases/download/v0.1.5/heimatcli_0.1.5_Linux_arm64.tar.gz"
-      sha256 "fdf0ce7219d9fb317786f5a5b616c000c412e899d79a3f59cdc52d64a2433b67"
-    end
-  end
+      url "https://github.com/sprinteins/heimatcli/releases/download/v0.2.0/heimatcli_0.2.0_Linux_arm64.tar.gz"
+      sha256 "5c4e027a119f1ca97977bd37aa59e174897d8acc34597809703129a8da7f265d"
 
-  def install
-    bin.install "heimatcli"
+      def install
+        bin.install "heimat"
+      end
+    end
+    if Hardware::CPU.intel?
+      url "https://github.com/sprinteins/heimatcli/releases/download/v0.2.0/heimatcli_0.2.0_Linux_x86_64.tar.gz"
+      sha256 "8f78c710014c24ec1fa7fe7e5ac9dc2692af7c94dbbd6f92a496d3eeaaecd3ef"
+
+      def install
+        bin.install "heimat"
+      end
+    end
   end
 end
