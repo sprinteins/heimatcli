@@ -15,7 +15,7 @@ builds:
     # https://golang.org/doc/install/source#environment
     goos:
       - linux
-      - windows
+      # - windows
       - darwin
     # https://golang.org/doc/install/source#environment
     goarch:
